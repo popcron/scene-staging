@@ -1,0 +1,22 @@
+{
+    "name": "com.popcron.scene-staging",
+    "version": "1.0.0",
+    "displayName": "Popcron Scene Staging",
+    "description": "Utility for working with Unity Scenes as JSON objects.",
+    "unity": "2019.3",
+    "dependencies":
+    {
+        "com.unity.nuget.newtonsoft-json": "2.0.0"
+    },
+    "keywords":
+    [
+        "scene",
+        "json"
+    ],
+    "author": 
+    {
+        "name": "popcron",
+        "email": "phill@popcron.ca",
+        "url": "https://popcron.ca"
+    }
+}
