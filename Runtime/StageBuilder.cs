@@ -137,31 +137,40 @@ namespace Popcron.SceneStaging
 
         private static void InjectRunner()
         {
-            PlayerLoopSystem playerLoop = PlayerLoop.GetCurrentPlayerLoop();
-            for (int i = 0; i < playerLoop.subSystemList.Length; i++)
+            if (Application.isPlaying)
             {
-                ref PlayerLoopSystem system = ref playerLoop.subSystemList[i];
-                if (system.type == typeof(Update))
-                {   
-                    //short circuit if already present
-                    for (int j = 0; j < system.subSystemList.Length; j++)
+                PlayerLoopSystem playerLoop = PlayerLoop.GetCurrentPlayerLoop();
+                for (int i = 0; i < playerLoop.subSystemList.Length; i++)
+                {
+                    ref PlayerLoopSystem system = ref playerLoop.subSystemList[i];
+                    if (system.type == typeof(Update))
                     {
-                        if (system.subSystemList[i].type == typeof(StageBuilderRunner))
+                        //short circuit if already present
+                        for (int j = 0; j < system.subSystemList.Length; j++)
                         {
-                            return;
+                            if (system.subSystemList[j].type == typeof(StageBuilderRunner))
+                            {
+                                return;
+                            }
                         }
+
+                        List<PlayerLoopSystem> list = system.subSystemList.ToList();
+                        PlayerLoopSystem runner = new PlayerLoopSystem();
+                        runner.type = typeof(StageBuilderRunner);
+                        runner.updateDelegate = OnUpdate;
+                        list.Add(runner);
+                        system.subSystemList = list.ToArray();
                     }
-
-                    List<PlayerLoopSystem> list = system.subSystemList.ToList();
-                    PlayerLoopSystem runner = new PlayerLoopSystem();
-                    runner.type = typeof(StageBuilderRunner);
-                    runner.updateDelegate = OnUpdate;
-                    list.Add(runner);
-                    system.subSystemList = list.ToArray();
                 }
-            }
 
-            PlayerLoop.SetPlayerLoop(playerLoop);
+                PlayerLoop.SetPlayerLoop(playerLoop);
+            }
+            else
+            {
+#if UNITY_EDITOR
+                EditorApplication.update += OnUpdate;
+#endif
+            }
         }
 
 #if UNITY_EDITOR
@@ -449,7 +458,6 @@ namespace Popcron.SceneStaging
             }
 
             LastStageScene = sceneName;
-            Debug.Log($"current stage scene name is now {sceneName}");
         }
 
         /// <summary>
