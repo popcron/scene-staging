@@ -47,8 +47,26 @@ namespace Popcron.SceneStaging
         public Stage Stage { get; set; }
 
         protected abstract bool IsMatch(Type type);
+
+        /// <summary>
+        /// Saves the variables from the Unity component onto the prop component.
+        /// </summary>
         public abstract void SaveComponent(Component component, Object unityComponent);
+
+        /// <summary>
+        /// Loads the variables and injects them into this Unity component.
+        /// </summary>
         public abstract void LoadComponent(Component component, Object unityComponent);
+
+        /// <summary>
+        /// Returns the variables from this component.
+        /// </summary>
+        public IList<Variable> SaveComponent(Object unityComponent)
+        {
+            Component temp = new Component("");
+            SaveComponent(temp, unityComponent);
+            return temp;
+        }
 
         /// <summary>
         /// Returns an existing component or creates one from this game object.
@@ -85,6 +103,11 @@ namespace Popcron.SceneStaging
         {
             int allCount = All.Count;
         }
+
+        /// <summary>
+        /// Returns a processor that is meant to process this kind of component.
+        /// </summary>
+        public static ComponentProcessor<T> Get<T>() where T : Object => Get(typeof(T)) as ComponentProcessor<T>;
 
         /// <summary>
         /// Returns a processor that is meant to process this kind of component.

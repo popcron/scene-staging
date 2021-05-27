@@ -497,8 +497,6 @@ namespace Popcron.SceneStaging
                 JObject propJson = new JObject();
                 propJson.Add("id", prop.ID);
                 propJson.Add("parent", prop.Parent);
-                propJson.Add("name", prop.Name);
-                propJson.Add("prefab", prop.Prefab);
 
                 //fill in the components of the prop
                 JArray compArray = new JArray();
@@ -568,11 +566,9 @@ namespace Popcron.SceneStaging
                         {
                             foreach (JToken prop in props)
                             {
-                                string propName = prop["name"]?.ToString();
-                                string propPrefab = prop["prefab"]?.ToString();
                                 int propId = int.Parse(prop["id"]?.ToString() ?? "-1");
                                 int propParent = int.Parse(prop["parent"]?.ToString() ?? "-1");
-                                Prop propAdded = map.AddProp(propName, propPrefab, propId, propParent);
+                                Prop propAdded = map.AddProp(propId, propParent);
 
                                 //add the components too
                                 if (prop["components"] is JArray components)
@@ -584,7 +580,6 @@ namespace Popcron.SceneStaging
                                         if (componentType is not null)
                                         {
                                             Component comp = new Component(componentType.ToString());
-
                                             JEnumerable<JProperty> properties = component.Children<JProperty>();
                                             foreach (JProperty property in properties)
                                             {

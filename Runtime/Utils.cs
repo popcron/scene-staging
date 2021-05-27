@@ -229,6 +229,38 @@ namespace Popcron.SceneStaging
         }
 
         /// <summary>
+        /// Returns true if this game object is the root of the prefab.
+        /// </summary>
+        public static bool IsPrefab(GameObject gameObject)
+        {
+#if UNITY_EDITOR
+            if (gameObject)
+            {
+                GameObject prefabRoot = PrefabUtility.GetOutermostPrefabInstanceRoot(gameObject);
+                if (prefabRoot)
+                {
+                    GameObject correspondingObject = PrefabUtility.GetCorrespondingObjectFromSource(prefabRoot);
+                    if (correspondingObject)
+                    {
+                        return prefabRoot == gameObject;
+                    }
+                }
+            }
+#else
+            if (gameObject)
+            {
+                Prefab prefab = gameObject.GetComponent<Prefab>();
+                if (prefab)
+                {
+                    return true;
+                }
+            }
+#endif
+
+            return false;
+        }
+
+        /// <summary>
         /// Returns the path to this prefab.
         /// </summary>
         public static string GetPrefabPath(GameObject gameObject)
@@ -241,6 +273,15 @@ namespace Popcron.SceneStaging
                 {
                     prefab = PrefabUtility.GetCorrespondingObjectFromSource(prefab);
                     return ReferencesDatabase.GetPath(prefab);
+                }
+            }
+#else
+            if (gameObject)
+            {
+                Prefab prefab = gameObject.GetComponentInParent<Prefab>();
+                if (prefab)
+                {
+                    return prefab.Path;
                 }
             }
 #endif
@@ -266,6 +307,15 @@ namespace Popcron.SceneStaging
                     }
 
                     parent = parent.parent;
+                }
+            }
+#else
+            if (gameObject)
+            {
+                Prefab prefab = gameObject.GetComponentInParent<Prefab>();
+                if (prefab)
+                {
+                    return prefab.gameObject != gameObject;
                 }
             }
 #endif

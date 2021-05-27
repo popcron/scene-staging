@@ -152,12 +152,12 @@ namespace Popcron.SceneStaging
             //new AddedPropToStage(this, prop).Dispatch();
         }
 
-        public Prop AddProp(GameObject gameObject, string prefab, int parent = -1)
+        public Prop AddProp(GameObject gameObject, int parent = -1)
         {
             if (gameObject)
             {
                 int id = props.Count;
-                Prop prop = new Prop(gameObject, prefab, id, parent);
+                Prop prop = new Prop(gameObject, id, parent);
                 AddProp(prop);
                 return prop;
             }
@@ -167,18 +167,18 @@ namespace Popcron.SceneStaging
             }
         }
 
-        public Prop AddProp(string name, string prefab, int id, int parent = -1)
+        public Prop AddProp(int id, int parent = -1)
         {
-            Prop prop = new Prop(name, prefab, id, parent);
+            Prop prop = new Prop(id, parent);
             AddProp(prop);
             return prop;
         }
 
-        public Prop AddProp(GameObject gameObject, string prefab, int id, int parent = -1)
+        public Prop AddProp(GameObject gameObject, int id, int parent = -1)
         {
             if (gameObject)
             {
-                Prop prop = new Prop(gameObject, prefab, id, parent);
+                Prop prop = new Prop(gameObject, id, parent);
                 AddProp(prop);
                 return prop;
             }

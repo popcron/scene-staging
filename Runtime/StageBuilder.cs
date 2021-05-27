@@ -7,9 +7,9 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
 using UnityComponent = UnityEngine.Component;
-using System.Threading;
 using UnityEngine.LowLevel;
 using UnityEngine.PlayerLoop;
+using System.Xml.Serialization;
 
 #if UNITY_EDITOR
 using UnityEditor.Callbacks;
@@ -197,6 +197,25 @@ namespace Popcron.SceneStaging
             BuildStep = StageBuildStep.CreatingProps;
         }
 
+        public static GameObject Instantiate(GameObject prefab, string prefabPath)
+        {
+#if UNITY_EDITOR
+            GameObject gameObject = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
+#else
+            GameObject gameObject = Object.Instantiate(prefab);
+            Prefab prefabComponent = gameObject.GetComponent<Prefab>();
+            if (!prefabComponent)
+            {
+                prefabComponent = gameObject.AddComponent<Prefab>();
+            }
+
+            prefabComponent.Original = prefab;
+            prefabComponent.Path = prefabPath;      
+#endif
+
+            return gameObject;
+        }
+
         private static void CreatingProps()
         {
             //create blank objects
@@ -209,20 +228,17 @@ namespace Popcron.SceneStaging
                 propObject.gameObject = null;
                 propObjects.Insert(prop.ID, propObject);
 
-                if (!string.IsNullOrEmpty(prop.Prefab))
+                string prefabPath = prop.Prefab.Path;
+                if (!string.IsNullOrEmpty(prefabPath))
                 {
-                    GameObject prefab = ReferencesDatabase.Get<GameObject>(prop.Prefab);
+                    GameObject prefab = ReferencesDatabase.Get<GameObject>(prefabPath);
                     if (prefab)
                     {
                         prefab.SetActive(false);
-#if UNITY_EDITOR
-                        propObject.gameObject = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
-#else
-                        propObject.gameObject = UnityEngine.Object.Instantiate(prefab);
-#endif
+                        propObject.gameObject = Instantiate(prefab, prefabPath);
                         propObject.gameObject.name = prop.Name;
                         propObject.prefab = prefab;
-                        propObject.prefabPath = ReferencesDatabase.GetPath(prefab);
+                        propObject.prefabPath = prefabPath;
                         prefab.SetActive(true);
                     }
                     else
@@ -525,17 +541,19 @@ namespace Popcron.SceneStaging
                 return null;
             }
 
-            string pathToScene = AssetDatabase.GetAssetPath(sceneAsset);
-            EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo();
-            Scene scene = EditorSceneManager.OpenScene(pathToScene, OpenSceneMode.Single);
-            SetActiveScene(scene);
-            return Export(scene.name, id);
-        }
-#else
-        public static Stage Export(object sceneAsset)
-        {
-            Debug.LogWarning("tried using an editor only method in build");
-            return null;
+            try
+            {
+                string pathToScene = AssetDatabase.GetAssetPath(sceneAsset);
+                EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo();
+                Scene scene = EditorSceneManager.OpenScene(pathToScene, OpenSceneMode.Single);
+                SetActiveScene(scene);
+                return Export(scene.name, id);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(e);
+                return null;
+            }
         }
 #endif
 
@@ -575,7 +593,7 @@ namespace Popcron.SceneStaging
                     }
 
                     //put gameObject in first
-                    ComponentProcessor processor = ComponentProcessor.Get(gameObject.GetType());
+                    ComponentProcessor processor = ComponentProcessor.Get<GameObject>();
                     if (processor is not null)
                     {
                         Component component = prop.AddComponent("UnityEngine.GameObject");
@@ -671,19 +689,126 @@ namespace Popcron.SceneStaging
 
         private static void Add(Stage stage, GameObject gameObject, Dictionary<GameObject, Prop> stageObjects)
         {
-            int id = stage.Props.Count;
-            string prefabPath = null;
-            if (!Utils.IsChildOfPrefab(gameObject))
-            {
-                prefabPath = Utils.GetPrefabPath(gameObject);
-            }
-            else
+            if (Utils.IsChildOfPrefab(gameObject))
             {
                 return;
             }
+            else
+            {
+                int id = stage.Props.Count;
+                Prop prop = stage.AddProp(gameObject, id);
+                if (Utils.IsPrefab(gameObject))
+                {
+                    AddPrefabInformation(stage, gameObject, prop);
+                }
 
-            Prop prop = stage.AddProp(gameObject, prefabPath, id);
-            stageObjects[gameObject] = prop;
+                stageObjects[gameObject] = prop;
+            }
+        }
+
+        private static void AddPrefabInformation(Stage stage, GameObject gameObject, Prop prop)
+        {
+            string prefabPath = Utils.GetPrefabPath(gameObject);
+            PrefabInformation prefabInformation = prop.Prefab;
+            prefabInformation.Path = prefabPath;
+
+#if UNITY_EDITOR
+            Queue<Transform> queue = new Queue<Transform>();
+            queue.Enqueue(gameObject.transform);
+
+            while (queue.Count > 0)
+            {
+                Transform child = queue.Dequeue();
+                AddModifications(child);
+
+                for (int i = 0; i < child.childCount; i++)
+                {
+                    queue.Enqueue(child.GetChild(i));
+                }
+            }
+
+            void AddModifications(Transform child)
+            {
+                GameObject correspondingGameObject = PrefabUtility.GetCorrespondingObjectFromSource(child.gameObject);
+                PropertyModification[] modifications = PrefabUtility.GetPropertyModifications(gameObject);
+                if (modifications is not null)
+                {
+                    for (int i = 0; i < modifications.Length; i++)
+                    {
+                        ref PropertyModification modification = ref modifications[i];
+                        ComponentProcessor processor = null;
+                        Object target = null;
+                        if (modification.target is UnityComponent unityComponent)
+                        {
+                            if (unityComponent.gameObject == correspondingGameObject)
+                            {
+                                processor = ComponentProcessor.Get(unityComponent.GetType());
+                                target = child.GetComponent(unityComponent.GetType());
+                            }
+                        }
+                        else if (modification.target is GameObject targetGameObject)
+                        {
+                            if (targetGameObject == correspondingGameObject)
+                            {
+                                processor = ComponentProcessor.Get<GameObject>();
+                                target = child.gameObject;
+                            }
+                        }
+
+                        if (processor is not null)
+                        {
+                            string path = GetLocalPath(gameObject.transform, target);
+                            IList<Variable> variables = processor.SaveComponent(target);
+                            foreach (Variable variable in variables)
+                            {
+                                string name = $"{path}/{variable.Name}";
+                                prefabInformation.Add(name, variable.Value);
+                            }
+                        }
+                    }
+                }
+            }
+#endif
+
+            prop.Prefab = prefabInformation;
+        }
+
+        private static string GetLocalPath(Transform root, Object obj)
+        {
+            Transform child = null;
+            string componentFullTypeName = null;
+            if (obj is GameObject objGameObject)
+            {
+                child = objGameObject.transform;
+                componentFullTypeName = typeof(GameObject).FullName;
+            }
+            else if (obj is UnityComponent objComponent)
+            {
+                child = objComponent.transform;
+                componentFullTypeName = objComponent.GetType().FullName;
+            }
+
+            string path = null;
+            if (child)
+            {
+                path = child.GetSiblingIndex().ToString();
+                if (root != child)
+                {
+                    Transform check = child;
+                    while (check.parent != root)
+                    {
+                        check = check.parent;
+                        if (!check)
+                        {
+                            break;
+                        }
+
+                        path = check.GetSiblingIndex().ToString() + "/" + path;
+                    }
+                }
+            }
+
+            return $"{path}.{componentFullTypeName}";
         }
 
         [Serializable]

@@ -10,12 +10,6 @@ namespace Popcron.SceneStaging
     public class Prop : IList<Component>, IEquatable<Prop>
     {
         [SerializeField]
-        private string name;
-
-        [SerializeField]
-        private string prefab;
-
-        [SerializeField]
         private int id;
 
         [SerializeField]
@@ -29,8 +23,19 @@ namespace Popcron.SceneStaging
 
         public int ID => id;
         public ref int Parent => ref parent;
-        public string Name => name;
-        public string Prefab => prefab;
+
+        /// <summary>
+        /// Name of this prop as it would be on a game object.
+        /// </summary>
+        public string Name
+        {
+            get
+            {
+                Component component = GetComponent<GameObject>();
+                return component.GetRaw("name");
+            }
+        }
+
         public GameObject GameObject { get; set; }
 
         public Transform Transform
@@ -53,6 +58,26 @@ namespace Popcron.SceneStaging
         /// </summary>
         public int Count => components.Count;
         bool ICollection<Component>.IsReadOnly => true;
+
+        /// <summary>
+        /// The component that represents the prefab revelant information.
+        /// </summary>
+        public PrefabInformation Prefab
+        {
+            get
+            {
+                Component component = GetOrAddComponent("$Prefab");
+                PrefabInformation prefabInformation = new PrefabInformation(component);
+                return prefabInformation;
+            }
+            set
+            {
+                Component component = GetOrAddComponent("$Prefab");
+                component.Clear();
+                value.Write(component);
+            }
+        }
+
         public Component this[int index]
         {
             get => components[index];
@@ -63,7 +88,7 @@ namespace Popcron.SceneStaging
         {
             if (toString is null)
             {
-                toString = $"{name}:{id}";
+                toString = $"{Name}:{id}";
             }
 
             return toString;
@@ -117,7 +142,7 @@ namespace Popcron.SceneStaging
             while (p != -1)
             {
                 Prop potentialParent = stage.GetProp(p);
-                if (potentialParent == null)
+                if (potentialParent is null)
                 {
                     return false;
                 }
@@ -139,15 +164,13 @@ namespace Popcron.SceneStaging
         /// </summary>
         public bool IsParentOf(Prop childProp, Stage stage) => childProp.IsChildOf(this, stage);
 
-        public Prop(GameObject gameObject, string prefab, int id, int parent) : this(gameObject.name, prefab, id, parent)
+        public Prop(GameObject gameObject, int id, int parent) : this(id, parent)
         {
             GameObject = gameObject;
         }
 
-        public Prop(string name, string prefab, int id, int parent)
+        public Prop(int id, int parent)
         {
-            this.name = name;
-            this.prefab = prefab;
             this.id = id;
             this.parent = parent;
             components = new List<Component>();
@@ -165,15 +188,51 @@ namespace Popcron.SceneStaging
             components.Add(component);
         }
 
+        public Component GetOrAddComponent(string fullTypeName)
+        {
+            int componentCount = components.Count;
+            for (int i = 0; i < componentCount; i++)
+            {
+                Component component = components[i];
+                if (component.FullTypeName == fullTypeName)
+                {
+                    return component;
+                }
+            }
+
+            return AddComponent(fullTypeName);
+        }
+
+        /// <summary>
+        /// Returns the first component of this type within this prop.
+        /// </summary>
+        public Component GetComponent<T>() where T : UnityEngine.Object
+        {
+            Type type = typeof(T);
+            int componentCount = components.Count;
+            for (int i = 0; i < componentCount; i++)
+            {
+                Component component = components[i];
+                if (type.IsAssignableFrom(component.Type))
+                {
+                    return component;
+                }
+            }
+
+            return null;
+        }
+
         /// <summary>
         /// Returns all component objects of this type within this prop.
         /// </summary>
-        public List<Component> GetComponent<T>() where T : UnityEngine.Component
+        public List<Component> GetComponents<T>() where T : UnityEngine.Object
         {
             List<Component> result = new List<Component>();
             Type type = typeof(T);
-            foreach (Component component in components)
+            int componentCount = components.Count;
+            for (int i = 0; i < componentCount; i++)
             {
+                Component component = components[i];
                 if (type.IsAssignableFrom(component.Type))
                 {
                     result.Add(component);
@@ -207,8 +266,6 @@ namespace Popcron.SceneStaging
             unchecked
             {
                 int hashCode = -271854945;
-                hashCode = hashCode * -1521134295 + name.GetHashCode();
-                hashCode = hashCode * -1521134295 + prefab.GetHashCode();
                 hashCode = hashCode * -1521134295 + id.GetHashCode();
                 hashCode = hashCode * -1521134295 + parent.GetHashCode();
 

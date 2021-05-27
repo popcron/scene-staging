@@ -34,6 +34,11 @@ namespace Popcron.SceneStaging
         }
 
         /// <summary>
+        /// The full name of the component type.
+        /// </summary>
+        public string FullTypeName => fullTypeName;
+
+        /// <summary>
         /// The amount of variables on this component.
         /// </summary>
         public int Count => variables.Count;
