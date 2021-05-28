@@ -164,12 +164,12 @@ namespace Popcron.SceneStaging
         /// </summary>
         public bool IsParentOf(Prop childProp, Stage stage) => childProp.IsChildOf(this, stage);
 
-        public Prop(GameObject gameObject, int id, int parent) : this(id, parent)
+        public Prop(GameObject gameObject, int id, int parent = -1) : this(id, parent)
         {
             GameObject = gameObject;
         }
 
-        public Prop(int id, int parent)
+        public Prop(int id, int parent = -1)
         {
             this.id = id;
             this.parent = parent;

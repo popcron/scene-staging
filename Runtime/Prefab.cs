@@ -1,26 +1,28 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace Popcron.SceneStaging
 {
     public class Prefab : MonoBehaviour
     {
         [SerializeField]
-        private GameObject original;
-
-        [SerializeField]
         private string path;
 
-        public GameObject Original
-        {
-            get => original;
-            set => original = value;
-        }
+        public string Path => path;
 
-        public string Path
+        private void OnValidate()
         {
-            get => path;
-            set => path = value;
+#if UNITY_EDITOR
+            GameObject prefab = PrefabUtility.GetCorrespondingObjectFromSource(gameObject);
+            string newPath = ReferencesDatabase.GetPath(prefab);
+            if (path != newPath)
+            {
+                path = newPath;
+            }
+#endif
         }
     }
 }

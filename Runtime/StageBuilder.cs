@@ -9,7 +9,6 @@ using Object = UnityEngine.Object;
 using UnityComponent = UnityEngine.Component;
 using UnityEngine.LowLevel;
 using UnityEngine.PlayerLoop;
-using System.Xml.Serialization;
 
 #if UNITY_EDITOR
 using UnityEditor.Callbacks;
@@ -689,21 +688,27 @@ namespace Popcron.SceneStaging
 
         private static void Add(Stage stage, GameObject gameObject, Dictionary<GameObject, Prop> stageObjects)
         {
-            if (Utils.IsChildOfPrefab(gameObject))
+            int id = stage.Props.Count;
+            Prop prop = new Prop(gameObject, id);
+            Prefab prefab = gameObject.GetComponentInParent<Prefab>();
+            if (prefab)
             {
-                return;
-            }
-            else
-            {
-                int id = stage.Props.Count;
-                Prop prop = stage.AddProp(gameObject, id);
-                if (Utils.IsPrefab(gameObject))
+                if (prefab.gameObject == gameObject)
                 {
-                    AddPrefabInformation(stage, gameObject, prop);
+                    //only add the pointer to the prefab
+                    PrefabInformation prefabInformation = new PrefabInformation();
+                    prefabInformation.Path = prefab.Path;
+                    prop.Prefab = prefabInformation;
                 }
-
-                stageObjects[gameObject] = prop;
+                else
+                {
+                    //child of the prefab, skip
+                    return;
+                }
             }
+
+            stage.AddProp(prop);
+            stageObjects[gameObject] = prop;
         }
 
         private static void AddPrefabInformation(Stage stage, GameObject gameObject, Prop prop)

@@ -26,6 +26,11 @@ namespace Popcron.SceneStaging
         /// </summary>
         public void Read(Component component)
         {
+            if (variables is null)
+            {
+                variables = new List<Variable>();
+            }
+
             variables.AddRange(component);
         }
 
@@ -34,6 +39,11 @@ namespace Popcron.SceneStaging
         /// </summary>
         public void Write(Component component)
         {
+            if (variables is null)
+            {
+                variables = new List<Variable>();
+            }
+
             int variablesCount = variables.Count;
             for (int i = 0; i < variablesCount; i++)
             {
@@ -44,6 +54,11 @@ namespace Popcron.SceneStaging
 
         private string GetRaw(string name)
         {
+            if (variables is null)
+            {
+                variables = new List<Variable>();
+            }
+
             int variablesCount = variables.Count;
             for (int i = variablesCount - 1; i >= 0; i--)
             {
@@ -67,6 +82,11 @@ namespace Popcron.SceneStaging
             if (stringValue is null)
             {
                 stringValue = Conversion.ToJsonToken(value)?.ToString();
+            }
+
+            if (variables is null)
+            {
+                variables = new List<Variable>();
             }
 
             int variablesCount = variables.Count;

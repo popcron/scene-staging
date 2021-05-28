@@ -71,6 +71,11 @@ namespace Popcron.SceneStaging
         /// </summary>
         public static string GetPath(Object asset)
         {
+            if (asset is null)
+            {
+                return null;
+            }
+
             if (assetToPath is null)
             {
                 Initialize();
