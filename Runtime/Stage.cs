@@ -9,7 +9,10 @@ namespace Popcron.SceneStaging
     [Serializable]
     public class Stage : IEquatable<Stage>
     {
-        public const string Extension = ".map";
+        public const ushort CurrentVersion = 1;
+
+        [SerializeField]
+        private ushort version = CurrentVersion;
 
         [SerializeField]
         private string id;
@@ -26,6 +29,11 @@ namespace Popcron.SceneStaging
         public string ID => id;
         public string DisplayName => displayName;
         public List<Prop> Props => props;
+
+        /// <summary>
+        /// The version in which this stage was created in.
+        /// </summary>
+        public ushort Version => version;
 
         public Stage(string displayName, string id)
         {

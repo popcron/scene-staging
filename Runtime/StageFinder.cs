@@ -23,10 +23,10 @@ namespace Popcron.SceneStaging
         /// <summary>
         /// Loads all stages from this specific directory and its sub directories recursively.
         /// </summary>
-        public static async Task<List<Stage>> LoadFromDirectory(string directory)
+        public static async Task<List<Stage>> LoadFromDirectory(string directory, string extension = "json")
         {
             List<Stage> stages = new List<Stage>();
-            string[] files = Directory.GetFiles(directory, $"*{Stage.Extension}", SearchOption.AllDirectories);
+            string[] files = Directory.GetFiles(directory, $"*{extension}", SearchOption.AllDirectories);
             int filesCount = files.Length;
             for (int i = filesCount - 1; i >= 0; i--)
             {

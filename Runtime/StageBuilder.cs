@@ -296,6 +296,11 @@ namespace Popcron.SceneStaging
                 for (int i = componentsCount - 1; i >= 0; i--)
                 {
                     Component component = prop[i];
+                    if (component.FullTypeName == "$prefab")
+                    {
+                        continue;
+                    }
+
                     Type type = component.Type;
                     ComponentProcessor processor = ComponentProcessor.Get(type);
                     if (processor is not null)

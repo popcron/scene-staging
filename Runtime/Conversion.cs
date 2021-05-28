@@ -485,6 +485,7 @@ namespace Popcron.SceneStaging
         public static string ToJson(Stage stage, bool prettyPrint)
         {
             JObject stageJson = new JObject();
+            stageJson.Add("version", stage.Version);
             stageJson.Add("id", stage.ID);
             stageJson.Add("name", stage.DisplayName);
 
@@ -505,7 +506,7 @@ namespace Popcron.SceneStaging
                 {
                     Component comp = prop[c];
                     JObject compJson = new JObject();
-                    compJson.Add("$type", comp.Type.FullName);
+                    compJson.Add("$type", comp.FullTypeName);
 
                     //fill in the variables for this component
                     int variablesCount = comp.Count;

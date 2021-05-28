@@ -2,13 +2,15 @@
 using System.Threading.Tasks;
 using UnityEditor;
 using UnityEditor.SceneManagement;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace Popcron.SceneStaging.UnityEditor
 {
     public class StageMenuItems
     {
-        private const string CreateStageFromScene = "Assets/Scene Staging/Create Stage";
+        private const string CreateStageFromScene = "Assets/Scene Staging/Create Stage as Asset";
+        private const string CreateStageFromSceneAsJSON = "Assets/Scene Staging/Create Stage as JSON";
         private const string OpenStageAsScene = "Assets/Scene Staging/Open as Scene";
         private const string SaveAsStage = "File/Save as Stage %&s";
 
@@ -48,33 +50,74 @@ namespace Popcron.SceneStaging.UnityEditor
         }
 
         [MenuItem(CreateStageFromScene, true)]
-        private static bool ConvertToStageValidation()
+        private static bool ConvertToStageValidation() => Selection.activeObject is SceneAsset;
+
+        [MenuItem(CreateStageFromSceneAsJSON)]
+        private static void CreateStageFromSceneAsJSONAction()
         {
-            return Selection.activeObject is SceneAsset;
+            if (Selection.activeObject is SceneAsset sceneAsset)
+            {
+                string previousScene = SceneManager.GetActiveScene().path;
+                Stage stage = StageBuilder.Export(sceneAsset);
+                if (stage is not null)
+                {
+                    string json = stage.ToJson();
+                    string assetPath = AssetDatabase.GetAssetPath(sceneAsset);
+                    assetPath = Path.ChangeExtension(assetPath, ".json");
+                    File.WriteAllText(assetPath, json);
+                    AssetDatabase.Refresh();
+                }
+
+                if (!string.IsNullOrEmpty(previousScene))
+                {
+                    Scene scene = EditorSceneManager.OpenScene(previousScene, OpenSceneMode.Single);
+                    SceneManager.SetActiveScene(scene);
+                }
+            }
         }
+
+        [MenuItem(CreateStageFromSceneAsJSON, true)]
+        private static bool CreateStageFromSceneAsJSONActionValidation() => Selection.activeObject is SceneAsset;
 
         [MenuItem(OpenStageAsScene)]
         private static async void ConvertToScene()
         {
+            Stage stage = null;
+            if (Selection.activeObject is TextAsset textAsset)
+            {
+                stage = Stage.FromJson(textAsset.text);
+            }
+
             if (Selection.activeObject is StageAsset stageAsset)
             {
-                Stage stage = stageAsset.Stage;
-                if (stage is not null)
-                {
-                    EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo();
-                    Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
-                    scene.name = stage.DisplayName;
+                stage = stageAsset.Stage;   
+            }
 
-                    await Task.Delay(1);
-                    StageBuilder.BuildAsync(stage);
-                }
+            if (stage is not null)
+            {
+                EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo();
+                Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+                scene.name = stage.DisplayName;
+
+                await Task.Delay(1);
+                StageBuilder.BuildAsync(stage);
             }
         }
 
         [MenuItem(OpenStageAsScene, true)]
         private static bool ConvertToSceneValidation()
         {
-            return Selection.activeObject is StageAsset;
+            if (Selection.activeObject is StageAsset)
+            {
+                return true;
+            }
+
+            if (Selection.activeObject is TextAsset textAsset)
+            {
+                return true;
+            }
+
+            return false;
         }
 
         [MenuItem(SaveAsStage, false, 170)]

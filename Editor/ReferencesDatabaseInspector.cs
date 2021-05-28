@@ -19,7 +19,7 @@ namespace Popcron.SceneStaging.UnityEditor
 
             //assign paths automatically
             int size = referencesProperty.arraySize;
-            for (int i = 0; i < size; i++)
+            for (int i = size - 1; i >= 0; i--)
             {
                 SerializedProperty reference = referencesProperty.GetArrayElementAtIndex(i);
                 SerializedProperty assetProperty = reference.FindPropertyRelative("asset");
@@ -31,7 +31,7 @@ namespace Popcron.SceneStaging.UnityEditor
                 }
                 else
                 {
-                    pathProperty.stringValue = "null";
+                    referencesProperty.DeleteArrayElementAtIndex(i);
                 }
             }
 
