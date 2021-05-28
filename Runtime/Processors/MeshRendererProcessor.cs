@@ -7,13 +7,13 @@ namespace Popcron.SceneStaging
     {
         protected override void Save(Component mapObject, MeshRenderer meshRenderer)
         {
-            mapObject.Add(nameof(meshRenderer.sharedMaterial), meshRenderer.sharedMaterial);
-            mapObject.Add(nameof(meshRenderer.sharedMaterials), meshRenderer.sharedMaterials);
-            mapObject.Add(nameof(meshRenderer.receiveShadows), meshRenderer.receiveShadows);
-            mapObject.Add(nameof(meshRenderer.shadowCastingMode), meshRenderer.shadowCastingMode);
-            mapObject.Add(nameof(meshRenderer.sortingLayerID), meshRenderer.sortingLayerID);
-            mapObject.Add(nameof(meshRenderer.sortingLayerName), meshRenderer.sortingLayerName);
-            mapObject.Add(nameof(meshRenderer.sortingOrder), meshRenderer.sortingOrder);
+            mapObject.Set(nameof(meshRenderer.sharedMaterial), meshRenderer.sharedMaterial);
+            mapObject.Set(nameof(meshRenderer.sharedMaterials), meshRenderer.sharedMaterials);
+            mapObject.Set(nameof(meshRenderer.receiveShadows), meshRenderer.receiveShadows);
+            mapObject.Set(nameof(meshRenderer.shadowCastingMode), meshRenderer.shadowCastingMode);
+            mapObject.Set(nameof(meshRenderer.sortingLayerID), meshRenderer.sortingLayerID);
+            mapObject.Set(nameof(meshRenderer.sortingLayerName), meshRenderer.sortingLayerName);
+            mapObject.Set(nameof(meshRenderer.sortingOrder), meshRenderer.sortingOrder);
         }
 
         protected override void Load(Component mapObject, MeshRenderer meshRenderer)

@@ -41,7 +41,7 @@ namespace Popcron.SceneStaging
                         stringBuilder.Append(pathToPrefab);
                         stringBuilder.Append(':');
                         stringBuilder.Append(fullTypeName);
-                        component.Add(field.Name, stringBuilder.ToString());
+                        component.Set(field.Name, stringBuilder.ToString());
                     }
                     else
                     {
@@ -50,11 +50,11 @@ namespace Popcron.SceneStaging
                             if (value is Transform transform && transform)
                             {
                                 int? id = Stage.GetProp(transform)?.ID;
-                                component.Add(field.Name, id?.ToString() ?? "");
+                                component.Set(field.Name, id?.ToString() ?? "");
                             }
                             else
                             {
-                                component.Add(field.Name, "");
+                                component.Set(field.Name, "");
                             }
                         }
                         else if (typeof(Behaviour).IsAssignableFrom(fieldType))
@@ -71,21 +71,21 @@ namespace Popcron.SceneStaging
                                     stringBuilder.Append(id);
                                     stringBuilder.Append(':');
                                     stringBuilder.Append(componentIndex);
-                                    component.Add(field.Name, stringBuilder.ToString());
+                                    component.Set(field.Name, stringBuilder.ToString());
                                 }
                                 else
                                 {
-                                    component.Add(field.Name, "");
+                                    component.Set(field.Name, "");
                                 }
                             }
                             else
                             {
-                                component.Add(field.Name, "");
+                                component.Set(field.Name, "");
                             }
                         }
                         else
                         {
-                            component.Add(field.Name, value);
+                            component.Set(field.Name, value);
                         }
                     }
                 }

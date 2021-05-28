@@ -6,9 +6,9 @@ namespace Popcron.SceneStaging
     {
         protected override void Save(Component component, BoxCollider boxCollider)
         {
-            component.Add(nameof(BoxCollider.size), boxCollider.size);
-            component.Add(nameof(BoxCollider.center), boxCollider.center);
-            component.Add(nameof(BoxCollider.isTrigger), boxCollider.isTrigger);
+            component.Set(nameof(BoxCollider.size), boxCollider.size);
+            component.Set(nameof(BoxCollider.center), boxCollider.center);
+            component.Set(nameof(BoxCollider.isTrigger), boxCollider.isTrigger);
         }
 
         protected override void Load(Component component, BoxCollider boxCollider)

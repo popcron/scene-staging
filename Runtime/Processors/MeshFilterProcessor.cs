@@ -6,7 +6,7 @@ namespace Popcron.SceneStaging
     {
         protected override void Save(Component mapObject, MeshFilter meshFilter)
         {
-            mapObject.Add(nameof(meshFilter.sharedMesh), meshFilter.sharedMesh);
+            mapObject.Set(nameof(meshFilter.sharedMesh), meshFilter.sharedMesh);
         }
 
         protected override void Load(Component mapObject, MeshFilter meshFilter)

@@ -6,22 +6,22 @@ namespace Popcron.SceneStaging
     {
         protected override void Save(Component component, AudioReverbZone audioReverbZone)
         {
-            component.Add(nameof(AudioReverbZone.decayHFRatio), audioReverbZone.decayHFRatio);
-            component.Add(nameof(AudioReverbZone.decayTime), audioReverbZone.decayTime);
-            component.Add(nameof(AudioReverbZone.density), audioReverbZone.density);
-            component.Add(nameof(AudioReverbZone.diffusion), audioReverbZone.diffusion);
-            component.Add(nameof(AudioReverbZone.HFReference), audioReverbZone.HFReference);
-            component.Add(nameof(AudioReverbZone.LFReference), audioReverbZone.LFReference);
-            component.Add(nameof(AudioReverbZone.maxDistance), audioReverbZone.maxDistance);
-            component.Add(nameof(AudioReverbZone.minDistance), audioReverbZone.minDistance);
-            component.Add(nameof(AudioReverbZone.reflections), audioReverbZone.reflections);
-            component.Add(nameof(AudioReverbZone.reflectionsDelay), audioReverbZone.reflectionsDelay);
-            component.Add(nameof(AudioReverbZone.reverb), audioReverbZone.reverb);
-            component.Add(nameof(AudioReverbZone.reverbDelay), audioReverbZone.reverbDelay);
-            component.Add(nameof(AudioReverbZone.reverbPreset), audioReverbZone.reverbPreset);
-            component.Add(nameof(AudioReverbZone.room), audioReverbZone.room);
-            component.Add(nameof(AudioReverbZone.roomHF), audioReverbZone.roomHF);
-            component.Add(nameof(AudioReverbZone.roomLF), audioReverbZone.roomLF);
+            component.Set(nameof(AudioReverbZone.decayHFRatio), audioReverbZone.decayHFRatio);
+            component.Set(nameof(AudioReverbZone.decayTime), audioReverbZone.decayTime);
+            component.Set(nameof(AudioReverbZone.density), audioReverbZone.density);
+            component.Set(nameof(AudioReverbZone.diffusion), audioReverbZone.diffusion);
+            component.Set(nameof(AudioReverbZone.HFReference), audioReverbZone.HFReference);
+            component.Set(nameof(AudioReverbZone.LFReference), audioReverbZone.LFReference);
+            component.Set(nameof(AudioReverbZone.maxDistance), audioReverbZone.maxDistance);
+            component.Set(nameof(AudioReverbZone.minDistance), audioReverbZone.minDistance);
+            component.Set(nameof(AudioReverbZone.reflections), audioReverbZone.reflections);
+            component.Set(nameof(AudioReverbZone.reflectionsDelay), audioReverbZone.reflectionsDelay);
+            component.Set(nameof(AudioReverbZone.reverb), audioReverbZone.reverb);
+            component.Set(nameof(AudioReverbZone.reverbDelay), audioReverbZone.reverbDelay);
+            component.Set(nameof(AudioReverbZone.reverbPreset), audioReverbZone.reverbPreset);
+            component.Set(nameof(AudioReverbZone.room), audioReverbZone.room);
+            component.Set(nameof(AudioReverbZone.roomHF), audioReverbZone.roomHF);
+            component.Set(nameof(AudioReverbZone.roomLF), audioReverbZone.roomLF);
         }
 
         protected override void Load(Component component, AudioReverbZone audioReverbZone)

@@ -7,24 +7,24 @@ namespace Popcron.SceneStaging
     {
         protected override void Save(Component mapObject, SpriteRenderer spriteRenderer)
         {
-            mapObject.Add(nameof(spriteRenderer.sprite), spriteRenderer.sprite);
-            mapObject.Add(nameof(spriteRenderer.flipX), spriteRenderer.flipX);
-            mapObject.Add(nameof(spriteRenderer.flipY), spriteRenderer.flipY);
-            mapObject.Add(nameof(spriteRenderer.color), spriteRenderer.color);
-            mapObject.Add(nameof(spriteRenderer.drawMode), spriteRenderer.drawMode);
-            mapObject.Add(nameof(spriteRenderer.adaptiveModeThreshold), spriteRenderer.adaptiveModeThreshold);
-            mapObject.Add(nameof(spriteRenderer.spriteSortPoint), spriteRenderer.spriteSortPoint);
-            mapObject.Add(nameof(spriteRenderer.tileMode), spriteRenderer.tileMode);
-            mapObject.Add(nameof(spriteRenderer.size), spriteRenderer.size);
-            mapObject.Add(nameof(spriteRenderer.maskInteraction), spriteRenderer.maskInteraction);
+            mapObject.Set(nameof(spriteRenderer.sprite), spriteRenderer.sprite);
+            mapObject.Set(nameof(spriteRenderer.flipX), spriteRenderer.flipX);
+            mapObject.Set(nameof(spriteRenderer.flipY), spriteRenderer.flipY);
+            mapObject.Set(nameof(spriteRenderer.color), spriteRenderer.color);
+            mapObject.Set(nameof(spriteRenderer.drawMode), spriteRenderer.drawMode);
+            mapObject.Set(nameof(spriteRenderer.adaptiveModeThreshold), spriteRenderer.adaptiveModeThreshold);
+            mapObject.Set(nameof(spriteRenderer.spriteSortPoint), spriteRenderer.spriteSortPoint);
+            mapObject.Set(nameof(spriteRenderer.tileMode), spriteRenderer.tileMode);
+            mapObject.Set(nameof(spriteRenderer.size), spriteRenderer.size);
+            mapObject.Set(nameof(spriteRenderer.maskInteraction), spriteRenderer.maskInteraction);
 
-            mapObject.Add(nameof(spriteRenderer.sharedMaterial), spriteRenderer.sharedMaterial);
-            mapObject.Add(nameof(spriteRenderer.sharedMaterials), spriteRenderer.sharedMaterials);
-            mapObject.Add(nameof(spriteRenderer.receiveShadows), spriteRenderer.receiveShadows);
-            mapObject.Add(nameof(spriteRenderer.shadowCastingMode), spriteRenderer.shadowCastingMode);
-            mapObject.Add(nameof(spriteRenderer.sortingLayerID), spriteRenderer.sortingLayerID);
-            mapObject.Add(nameof(spriteRenderer.sortingLayerName), spriteRenderer.sortingLayerName);
-            mapObject.Add(nameof(spriteRenderer.sortingOrder), spriteRenderer.sortingOrder);
+            mapObject.Set(nameof(spriteRenderer.sharedMaterial), spriteRenderer.sharedMaterial);
+            mapObject.Set(nameof(spriteRenderer.sharedMaterials), spriteRenderer.sharedMaterials);
+            mapObject.Set(nameof(spriteRenderer.receiveShadows), spriteRenderer.receiveShadows);
+            mapObject.Set(nameof(spriteRenderer.shadowCastingMode), spriteRenderer.shadowCastingMode);
+            mapObject.Set(nameof(spriteRenderer.sortingLayerID), spriteRenderer.sortingLayerID);
+            mapObject.Set(nameof(spriteRenderer.sortingLayerName), spriteRenderer.sortingLayerName);
+            mapObject.Set(nameof(spriteRenderer.sortingOrder), spriteRenderer.sortingOrder);
         }
 
         protected override void Load(Component mapObject, SpriteRenderer spriteRenderer)

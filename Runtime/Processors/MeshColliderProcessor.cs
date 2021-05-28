@@ -6,9 +6,9 @@ namespace Popcron.SceneStaging
     {
         protected override void Save(Component mapObject, MeshCollider meshCollider)
         {
-            mapObject.Add(nameof(meshCollider.sharedMesh), meshCollider.sharedMesh);
-            mapObject.Add(nameof(meshCollider.convex), meshCollider.convex);
-            mapObject.Add(nameof(meshCollider.isTrigger), meshCollider.isTrigger);
+            mapObject.Set(nameof(meshCollider.sharedMesh), meshCollider.sharedMesh);
+            mapObject.Set(nameof(meshCollider.convex), meshCollider.convex);
+            mapObject.Set(nameof(meshCollider.isTrigger), meshCollider.isTrigger);
         }
 
         protected override void Load(Component mapObject, MeshCollider meshCollider)

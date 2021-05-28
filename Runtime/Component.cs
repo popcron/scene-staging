@@ -42,7 +42,9 @@ namespace Popcron.SceneStaging
         /// The amount of variables on this component.
         /// </summary>
         public int Count => variables.Count;
+
         bool ICollection<Variable>.IsReadOnly => true;
+
         public Variable this[int index]
         {
             get => variables[index];
@@ -61,19 +63,18 @@ namespace Popcron.SceneStaging
         }
 
         /// <summary>
-        /// Adds a new variable with this name and value.
-        /// If a variable with this name already exists, it will just set the new value.
+        /// Sets an existing variable with this name or adds a new one.
         /// </summary>
-        public void Add(string name, object value)
+        public void Set(string name, object value)
         {
             if (value is string stringValue)
             {
-                Add(new Variable(name, stringValue));
+                Set(new Variable(name, stringValue));
             }
             else
             {
                 stringValue = Conversion.ToJsonToken(value)?.ToString();
-                Add(new Variable(name, stringValue));
+                Set(new Variable(name, stringValue));
             }
         }
 
@@ -81,7 +82,7 @@ namespace Popcron.SceneStaging
         /// Adds a new variable with this name and value.
         /// If a variable with this name already exists, it will just set the new value.
         /// </summary>
-        public void Add(Variable variable)
+        public void Set(Variable variable)
         {
             int variablesCount = variables.Count;
             for (int i = variablesCount - 1; i >= 0; i--)
@@ -97,17 +98,38 @@ namespace Popcron.SceneStaging
         }
 
         /// <summary>
-        /// Returns true if this variable exists on this component.
+        /// Returns true if a variable with this name already exists on this component.
         /// </summary>
         public bool Contains(string name) => IndexOf(name) != -1;
 
+        /// <summary>
+        /// Returns the index of the first variable with this name.
+        /// </summary>
         public int IndexOf(string name)
         {
             int variablesCount = variables.Count;
-            for (int i = variablesCount - 1; i >= 0; i--)
+            for (int i = 0; i < variablesCount; i++)
             {
                 Variable variable = variables[i];
                 if (variable.Name == name)
+                {
+                    return i;
+                }
+            }
+
+            return -1;
+        }
+
+        /// <summary>
+        /// Returns the index of this variable.
+        /// </summary>
+        public int IndexOf(Variable variable)
+        {
+            int variablesCount = variables.Count;
+            for (int i = 0; i < variablesCount; i++)
+            {
+                Variable variableHere = variables[i];
+                if (variable.Name == variableHere.Name && variable.Value == variableHere.Value)
                 {
                     return i;
                 }
@@ -122,13 +144,13 @@ namespace Popcron.SceneStaging
         public void Clear() => variables.Clear();
 
         /// <summary>
-        /// Returns the value from a variable with this name.
+        /// Returns the value from the first variable with this name.
         /// </summary>
         public object Get(string name, Type type)
         {
             bool isString = type == typeof(string);
             int variablesCount = variables.Count;
-            for (int i = variablesCount - 1; i >= 0; i--)
+            for (int i = 0; i < variablesCount; i++)
             {
                 Variable variable = variables[i];
                 if (variable.Name == name)
@@ -153,12 +175,12 @@ namespace Popcron.SceneStaging
         public T Get<T>(string name) => (T)Get(name, typeof(T));
 
         /// <summary>
-        /// Returns the raw value from a variable with this name.
+        /// Returns the raw value from the first variable with this name.
         /// </summary>
         public string GetRaw(string name)
         {
             int variablesCount = variables.Count;
-            for (int i = variablesCount - 1; i >= 0; i--)
+            for (int i = 0; i < variablesCount; i++)
             {
                 Variable variable = variables[i];
                 if (variable.Name == name)
@@ -170,10 +192,10 @@ namespace Popcron.SceneStaging
             return null;
         }
 
-        int IList<Variable>.IndexOf(Variable item) => variables.IndexOf(item);
-        void IList<Variable>.Insert(int index, Variable item) => variables.Insert(index, item);
+        void IList<Variable>.Insert(int index, Variable variable) => variables.Insert(index, variable);
         void IList<Variable>.RemoveAt(int index) => variables.RemoveAt(index);
-        bool ICollection<Variable>.Contains(Variable item) => variables.Contains(item);
+        void ICollection<Variable>.Add(Variable variable) => Set(variable);
+        bool ICollection<Variable>.Contains(Variable variable) => IndexOf(variable) != -1;
         void ICollection<Variable>.CopyTo(Variable[] array, int arrayIndex) => variables.CopyTo(array, arrayIndex);
         bool ICollection<Variable>.Remove(Variable item) => variables.Remove(item);
         IEnumerator<Variable> IEnumerable<Variable>.GetEnumerator() => variables.GetEnumerator();

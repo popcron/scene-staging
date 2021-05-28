@@ -6,11 +6,11 @@ namespace Popcron.SceneStaging
     {
         protected override void Save(Component component, CapsuleCollider capsuleCollider)
         {
-            component.Add(nameof(capsuleCollider.radius), capsuleCollider.radius);
-            component.Add(nameof(capsuleCollider.height), capsuleCollider.height);
-            component.Add(nameof(capsuleCollider.direction), capsuleCollider.direction);
-            component.Add(nameof(capsuleCollider.center), capsuleCollider.center);
-            component.Add(nameof(capsuleCollider.isTrigger), capsuleCollider.isTrigger);
+            component.Set(nameof(capsuleCollider.radius), capsuleCollider.radius);
+            component.Set(nameof(capsuleCollider.height), capsuleCollider.height);
+            component.Set(nameof(capsuleCollider.direction), capsuleCollider.direction);
+            component.Set(nameof(capsuleCollider.center), capsuleCollider.center);
+            component.Set(nameof(capsuleCollider.isTrigger), capsuleCollider.isTrigger);
         }
 
         protected override void Load(Component component, CapsuleCollider capsuleCollider)

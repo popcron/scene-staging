@@ -6,15 +6,15 @@ namespace Popcron.SceneStaging
     {
         protected override void Save(Component component, BoxCollider2D boxCollider)
         {
-            component.Add(nameof(boxCollider.autoTiling), boxCollider.autoTiling);
-            component.Add(nameof(boxCollider.edgeRadius), boxCollider.edgeRadius);
-            component.Add(nameof(boxCollider.size), boxCollider.size);
-            component.Add(nameof(boxCollider.density), boxCollider.density);
-            component.Add(nameof(boxCollider.isTrigger), boxCollider.isTrigger);
-            component.Add(nameof(boxCollider.offset), boxCollider.offset);
-            component.Add(nameof(boxCollider.sharedMaterial), boxCollider.sharedMaterial);
-            component.Add(nameof(boxCollider.usedByComposite), boxCollider.usedByComposite);
-            component.Add(nameof(boxCollider.usedByEffector), boxCollider.usedByEffector);
+            component.Set(nameof(boxCollider.autoTiling), boxCollider.autoTiling);
+            component.Set(nameof(boxCollider.edgeRadius), boxCollider.edgeRadius);
+            component.Set(nameof(boxCollider.size), boxCollider.size);
+            component.Set(nameof(boxCollider.density), boxCollider.density);
+            component.Set(nameof(boxCollider.isTrigger), boxCollider.isTrigger);
+            component.Set(nameof(boxCollider.offset), boxCollider.offset);
+            component.Set(nameof(boxCollider.sharedMaterial), boxCollider.sharedMaterial);
+            component.Set(nameof(boxCollider.usedByComposite), boxCollider.usedByComposite);
+            component.Set(nameof(boxCollider.usedByEffector), boxCollider.usedByEffector);
         }
 
         protected override void Load(Component component, BoxCollider2D boxCollider)

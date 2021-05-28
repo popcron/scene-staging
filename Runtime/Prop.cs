@@ -22,7 +22,14 @@ namespace Popcron.SceneStaging
         [NonSerialized]
         private string toString;
 
+        /// <summary>
+        /// The unique ID of this prop.
+        /// </summary>
         public int ID => id;
+
+        /// <summary>
+        /// The ID of the prop that is this prop's parent.
+        /// </summary>
         public ref int Parent => ref parent;
 
         /// <summary>
@@ -37,8 +44,16 @@ namespace Popcron.SceneStaging
             }
         }
 
+        /// <summary>
+        /// The game object that represents this prop.
+        /// This property is not serialized so do not rely on it during play mode in editor!
+        /// </summary>
         public GameObject GameObject { get; set; }
 
+        /// <summary>
+        /// The transform that represents this prop.
+        /// This property is not serialized so do not rely on it during play mode in editor!
+        /// </summary>
         public Transform Transform
         {
             get
@@ -58,7 +73,6 @@ namespace Popcron.SceneStaging
         /// The amount of components on this prop.
         /// </summary>
         public int Count => components.Count;
-        bool ICollection<Component>.IsReadOnly => true;
 
         /// <summary>
         /// The component that represents the prefab revelant information.
@@ -79,10 +93,24 @@ namespace Popcron.SceneStaging
             }
         }
 
+        bool ICollection<Component>.IsReadOnly => true;
+
         public Component this[int index]
         {
             get => components[index];
             set => components[index] = value;
+        }
+
+        public Prop(GameObject gameObject, int id, int parent = -1) : this(id, parent)
+        {
+            GameObject = gameObject;
+        }
+
+        public Prop(int id, int parent = -1)
+        {
+            this.id = id;
+            this.parent = parent;
+            components = new List<Component>();
         }
 
         public override string ToString()
@@ -95,6 +123,9 @@ namespace Popcron.SceneStaging
             return toString;
         }
 
+        /// <summary>
+        /// Returns the parent of this prop.
+        /// </summary>
         public Prop GetParent(Stage stage)
         {
             if (parent == -1)
@@ -165,18 +196,9 @@ namespace Popcron.SceneStaging
         /// </summary>
         public bool IsParentOf(Prop childProp, Stage stage) => childProp.IsChildOf(this, stage);
 
-        public Prop(GameObject gameObject, int id, int parent = -1) : this(id, parent)
-        {
-            GameObject = gameObject;
-        }
-
-        public Prop(int id, int parent = -1)
-        {
-            this.id = id;
-            this.parent = parent;
-            components = new List<Component>();
-        }
-
+        /// <summary>
+        /// Adds a component of this type as a string to the prop.
+        /// </summary>
         public Component AddComponent(string fullTypeName, IList<Variable> variables = null)
         {
             Component newComponent = new Component(fullTypeName, variables);
@@ -184,12 +206,15 @@ namespace Popcron.SceneStaging
             return newComponent;
         }
 
+        /// <summary>
+        /// Adds a component of this type to the prop.
+        /// </summary>
         public Component AddComponent<T>(IList<Variable> variables = null) where T : Object => AddComponent(typeof(T).FullName, variables);
 
-        public void AddComponent(Component component)
-        {
-            components.Add(component);
-        }
+        /// <summary>
+        /// Adds this component to the prop.
+        /// </summary>
+        public void AddComponent(Component component) => components.Add(component);
 
         public Component GetOrAddComponent(string fullTypeName)
         {
@@ -228,7 +253,7 @@ namespace Popcron.SceneStaging
         /// <summary>
         /// Returns all component objects of this type within this prop.
         /// </summary>
-        public List<Component> GetComponents<T>() where T : UnityEngine.Object
+        public List<Component> GetComponents<T>() where T : Object
         {
             List<Component> result = new List<Component>();
             Type type = typeof(T);

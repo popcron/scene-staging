@@ -6,9 +6,9 @@ namespace Popcron.SceneStaging
     {
         protected override void Save(Component mapObject, SphereCollider sphereCollider)
         {
-            mapObject.Add(nameof(sphereCollider.radius), sphereCollider.radius);
-            mapObject.Add(nameof(sphereCollider.center), sphereCollider.center);
-            mapObject.Add(nameof(sphereCollider.isTrigger), sphereCollider.isTrigger);
+            mapObject.Set(nameof(sphereCollider.radius), sphereCollider.radius);
+            mapObject.Set(nameof(sphereCollider.center), sphereCollider.center);
+            mapObject.Set(nameof(sphereCollider.isTrigger), sphereCollider.isTrigger);
         }
 
         protected override void Load(Component mapObject, SphereCollider sphereCollider)

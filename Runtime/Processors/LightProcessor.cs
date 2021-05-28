@@ -7,22 +7,22 @@ namespace Popcron.SceneStaging
     {
         protected override void Save(Component component, Light light)
         {
-            component.Add(nameof(light.type), light.type);
-            component.Add(nameof(light.intensity), light.intensity);
-            component.Add(nameof(light.color), light.color);
-            component.Add(nameof(light.colorTemperature), light.colorTemperature);
-            component.Add(nameof(light.innerSpotAngle), light.innerSpotAngle);
-            component.Add(nameof(light.range), light.range);
-            component.Add(nameof(light.useColorTemperature), light.useColorTemperature);
-            component.Add(nameof(light.renderMode), light.renderMode);
-            component.Add(nameof(light.shadowBias), light.shadowBias);
-            component.Add(nameof(light.shadowCustomResolution), light.shadowCustomResolution);
-            component.Add(nameof(light.shadowNearPlane), light.shadowNearPlane);
-            component.Add(nameof(light.shadowNormalBias), light.shadowNormalBias);
-            component.Add(nameof(light.shadowResolution), light.shadowResolution);
-            component.Add(nameof(light.shadows), light.shadows);
-            component.Add(nameof(light.shape), light.shape);
-            component.Add(nameof(light.spotAngle), light.spotAngle);
+            component.Set(nameof(light.type), light.type);
+            component.Set(nameof(light.intensity), light.intensity);
+            component.Set(nameof(light.color), light.color);
+            component.Set(nameof(light.colorTemperature), light.colorTemperature);
+            component.Set(nameof(light.innerSpotAngle), light.innerSpotAngle);
+            component.Set(nameof(light.range), light.range);
+            component.Set(nameof(light.useColorTemperature), light.useColorTemperature);
+            component.Set(nameof(light.renderMode), light.renderMode);
+            component.Set(nameof(light.shadowBias), light.shadowBias);
+            component.Set(nameof(light.shadowCustomResolution), light.shadowCustomResolution);
+            component.Set(nameof(light.shadowNearPlane), light.shadowNearPlane);
+            component.Set(nameof(light.shadowNormalBias), light.shadowNormalBias);
+            component.Set(nameof(light.shadowResolution), light.shadowResolution);
+            component.Set(nameof(light.shadows), light.shadows);
+            component.Set(nameof(light.shape), light.shape);
+            component.Set(nameof(light.spotAngle), light.spotAngle);
         }
 
         protected override void Load(Component component, Light light)

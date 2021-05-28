@@ -6,21 +6,21 @@ namespace Popcron.SceneStaging
     {
         protected override void Save(Component component, Camera camera)
         {
-            component.Add(nameof(camera.orthographic), camera.orthographic);
-            component.Add(nameof(camera.orthographicSize), camera.orthographicSize);
-            component.Add(nameof(camera.cullingMask), camera.cullingMask);
-            component.Add(nameof(camera.cameraType), camera.cameraType);
-            component.Add(nameof(camera.clearFlags), camera.clearFlags);
-            component.Add(nameof(camera.backgroundColor), camera.backgroundColor);
-            component.Add(nameof(camera.depth), camera.depth);
-            component.Add(nameof(camera.lensShift), camera.lensShift);
-            component.Add(nameof(camera.usePhysicalProperties), camera.usePhysicalProperties);
-            component.Add(nameof(camera.targetTexture), camera.targetTexture);
-            component.Add(nameof(camera.fieldOfView), camera.fieldOfView);
-            component.Add(nameof(camera.focalLength), camera.focalLength);
-            component.Add(nameof(camera.forceIntoRenderTexture), camera.forceIntoRenderTexture);
-            component.Add(nameof(camera.nearClipPlane), camera.nearClipPlane);
-            component.Add(nameof(camera.farClipPlane), camera.farClipPlane);
+            component.Set(nameof(camera.orthographic), camera.orthographic);
+            component.Set(nameof(camera.orthographicSize), camera.orthographicSize);
+            component.Set(nameof(camera.cullingMask), camera.cullingMask);
+            component.Set(nameof(camera.cameraType), camera.cameraType);
+            component.Set(nameof(camera.clearFlags), camera.clearFlags);
+            component.Set(nameof(camera.backgroundColor), camera.backgroundColor);
+            component.Set(nameof(camera.depth), camera.depth);
+            component.Set(nameof(camera.lensShift), camera.lensShift);
+            component.Set(nameof(camera.usePhysicalProperties), camera.usePhysicalProperties);
+            component.Set(nameof(camera.targetTexture), camera.targetTexture);
+            component.Set(nameof(camera.fieldOfView), camera.fieldOfView);
+            component.Set(nameof(camera.focalLength), camera.focalLength);
+            component.Set(nameof(camera.forceIntoRenderTexture), camera.forceIntoRenderTexture);
+            component.Set(nameof(camera.nearClipPlane), camera.nearClipPlane);
+            component.Set(nameof(camera.farClipPlane), camera.farClipPlane);
         }
 
         protected override void Load(Component component, Camera camera)

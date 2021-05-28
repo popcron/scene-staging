@@ -6,7 +6,7 @@ namespace Popcron.SceneStaging
     {
         protected override void Save(Component mapObject, Skybox skybox)
         {
-            mapObject.Add(nameof(skybox.material), skybox.material);
+            mapObject.Set(nameof(skybox.material), skybox.material);
         }
 
         protected override void Load(Component mapObject, Skybox skybox)

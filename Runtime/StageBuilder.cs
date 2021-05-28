@@ -9,11 +9,13 @@ using Object = UnityEngine.Object;
 using UnityComponent = UnityEngine.Component;
 using UnityEngine.LowLevel;
 using UnityEngine.PlayerLoop;
+using System.Collections;
 
 #if UNITY_EDITOR
 using UnityEditor.Callbacks;
 using UnityEditor;
 using UnityEditor.SceneManagement;
+using UnityEditor.Compilation;
 #endif
 
 namespace Popcron.SceneStaging
@@ -24,7 +26,7 @@ namespace Popcron.SceneStaging
         private static Stage stage;
         private static StageBuildStep buildStep = StageBuildStep.Inactive;
         private static int index;
-        private static List<PropObject> propObjects = new List<PropObject>();
+        private static PropsCollection propObjects = new PropsCollection();
 
         public delegate void StageBuiltDelegate(Stage stage);
         public static StageBuiltDelegate OnBuiltStage { get; set; }
@@ -199,8 +201,12 @@ namespace Popcron.SceneStaging
         public static GameObject Instantiate(GameObject prefab, string prefabPath)
         {
 #if UNITY_EDITOR
-            GameObject gameObject = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
-#else
+            if (!Application.isPlaying)
+            {
+                return PrefabUtility.InstantiatePrefab(prefab) as GameObject;
+            }
+#endif
+
             GameObject gameObject = Object.Instantiate(prefab);
             Prefab prefabComponent = gameObject.GetComponent<Prefab>();
             if (!prefabComponent)
@@ -208,10 +214,7 @@ namespace Popcron.SceneStaging
                 prefabComponent = gameObject.AddComponent<Prefab>();
             }
 
-            prefabComponent.Original = prefab;
-            prefabComponent.Path = prefabPath;      
-#endif
-
+            prefabComponent.Path = prefabPath;
             return gameObject;
         }
 
@@ -223,7 +226,7 @@ namespace Popcron.SceneStaging
             if (stage.Props.Count > 0)
             {
                 Prop prop = stage.Props[index];
-                PropObject propObject = new PropObject();
+                PropsCollection.PropObject propObject = new PropsCollection.PropObject();
                 propObject.gameObject = null;
                 propObjects.Insert(prop.ID, propObject);
 
@@ -495,24 +498,6 @@ namespace Popcron.SceneStaging
             }
         }
 
-        /// <summary>
-        /// Returns a prop object based on this game object.
-        /// </summary>
-        public static PropObject GetPropObject(GameObject gameObject)
-        {
-            int propsCount = propObjects.Count;
-            for (int i = propsCount - 1; i >= 0; i--)
-            {
-                PropObject prop = propObjects[i];
-                if (prop.gameObject == gameObject)
-                {
-                    return prop;
-                }
-            }
-
-            return null;
-        }
-
         private static SceneSettings CreateSceneSettings()
         {
             SceneSettings sceneSettings = Object.FindObjectOfType<SceneSettings>();
@@ -660,7 +645,7 @@ namespace Popcron.SceneStaging
                                                 //wasnt set because it doesnt exist in the list
                                                 if (!set)
                                                 {
-                                                    comp.Add(field.Name, transformObject.ID);
+                                                    comp.Set(field.Name, transformObject.ID);
                                                 }
                                             }
                                         }
@@ -722,122 +707,40 @@ namespace Popcron.SceneStaging
             stageObjects[gameObject] = prop;
         }
 
-        private static void AddPrefabInformation(Stage stage, GameObject gameObject, Prop prop)
-        {
-            string prefabPath = Utils.GetPrefabPath(gameObject);
-            PrefabInformation prefabInformation = prop.Prefab;
-            prefabInformation.Path = prefabPath;
-
-#if UNITY_EDITOR
-            Queue<Transform> queue = new Queue<Transform>();
-            queue.Enqueue(gameObject.transform);
-
-            while (queue.Count > 0)
-            {
-                Transform child = queue.Dequeue();
-                AddModifications(child);
-
-                for (int i = 0; i < child.childCount; i++)
-                {
-                    queue.Enqueue(child.GetChild(i));
-                }
-            }
-
-            void AddModifications(Transform child)
-            {
-                GameObject correspondingGameObject = PrefabUtility.GetCorrespondingObjectFromSource(child.gameObject);
-                PropertyModification[] modifications = PrefabUtility.GetPropertyModifications(gameObject);
-                if (modifications is not null)
-                {
-                    for (int i = 0; i < modifications.Length; i++)
-                    {
-                        ref PropertyModification modification = ref modifications[i];
-                        ComponentProcessor processor = null;
-                        Object target = null;
-                        if (modification.target is UnityComponent unityComponent)
-                        {
-                            if (unityComponent.gameObject == correspondingGameObject)
-                            {
-                                processor = ComponentProcessor.Get(unityComponent.GetType());
-                                target = child.GetComponent(unityComponent.GetType());
-                            }
-                        }
-                        else if (modification.target is GameObject targetGameObject)
-                        {
-                            if (targetGameObject == correspondingGameObject)
-                            {
-                                processor = ComponentProcessor.Get<GameObject>();
-                                target = child.gameObject;
-                            }
-                        }
-
-                        if (processor is not null)
-                        {
-                            string path = GetLocalPath(gameObject.transform, target);
-                            IList<Variable> variables = processor.SaveComponent(target);
-                            foreach (Variable variable in variables)
-                            {
-                                string name = $"{path}/{variable.Name}";
-                                prefabInformation.Add(name, variable.Value);
-                            }
-                        }
-                    }
-                }
-            }
-#endif
-
-            prop.Prefab = prefabInformation;
-        }
-
-        private static string GetLocalPath(Transform root, Object obj)
-        {
-            Transform child = null;
-            string componentFullTypeName = null;
-            if (obj is GameObject objGameObject)
-            {
-                child = objGameObject.transform;
-                componentFullTypeName = typeof(GameObject).FullName;
-            }
-            else if (obj is UnityComponent objComponent)
-            {
-                child = objComponent.transform;
-                componentFullTypeName = objComponent.GetType().FullName;
-            }
-
-            string path = null;
-            if (child)
-            {
-                path = child.GetSiblingIndex().ToString();
-                if (root != child)
-                {
-                    Transform check = child;
-                    while (check.parent != root)
-                    {
-                        check = check.parent;
-                        if (!check)
-                        {
-                            break;
-                        }
-
-                        path = check.GetSiblingIndex().ToString() + "/" + path;
-                    }
-                }
-            }
-
-            return $"{path}.{componentFullTypeName}";
-        }
-
         [Serializable]
-        public class PropObject
+        public class PropsCollection : IList<PropsCollection.PropObject>
         {
-            public GameObject gameObject;
-            public GameObject prefab;
-            public string prefabPath;
+            public List<PropObject> list = new List<PropObject>();
+
+            public PropObject this[int index]
+            { 
+                get => list[index]; 
+                set => list[index] = value;
+            }
+
+            public int Count => list.Count;
+            public bool IsReadOnly => false;
+
+            public void Add(PropObject item) => list.Add(item);
+            public void Clear() => list.Clear();
+            public bool Contains(PropObject item) => list.Contains(item);
+            public void CopyTo(PropObject[] array, int arrayIndex) => list.CopyTo(array, arrayIndex);
+            public IEnumerator<PropObject> GetEnumerator() => list.GetEnumerator();
+            public int IndexOf(PropObject item) => list.IndexOf(item);
+            public void Insert(int index, PropObject item) => list.Insert(index, item);
+            public bool Remove(PropObject item) => list.Remove(item);
+            public void RemoveAt(int index) => list.RemoveAt(index);
+            IEnumerator IEnumerable.GetEnumerator() => list.GetEnumerator();
+
+            [Serializable]
+            public class PropObject
+            {
+                public GameObject gameObject;
+                public GameObject prefab;
+                public string prefabPath;
+            }
         }
 
-        public struct StageBuilderRunner
-        {
-
-        }
+        public struct StageBuilderRunner { }
     }
 }

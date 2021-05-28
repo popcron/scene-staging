@@ -586,7 +586,7 @@ namespace Popcron.SceneStaging
                                             {
                                                 if (property.Name != "$type")
                                                 {
-                                                    comp.Add(property.Name, property.Value?.ToString());
+                                                    comp.Set(property.Name, property.Value?.ToString());
                                                 }
                                             }
 

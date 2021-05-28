@@ -6,9 +6,9 @@ namespace Popcron.SceneStaging
     {
         protected override void Save(Component mapObject, Transform transform)
         {
-            mapObject.Add(nameof(transform.localPosition), transform.localPosition);
-            mapObject.Add(nameof(transform.localEulerAngles), transform.localEulerAngles);
-            mapObject.Add(nameof(transform.localScale), transform.localScale);
+            mapObject.Set(nameof(transform.localPosition), transform.localPosition);
+            mapObject.Set(nameof(transform.localEulerAngles), transform.localEulerAngles);
+            mapObject.Set(nameof(transform.localScale), transform.localScale);
         }
 
         protected override void Load(Component mapObject, Transform transform)

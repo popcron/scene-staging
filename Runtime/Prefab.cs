@@ -12,17 +12,27 @@ namespace Popcron.SceneStaging
         [SerializeField]
         private string path;
 
-        public string Path => path;
+        /// <summary>
+        /// The path to this prefab.
+        /// </summary>
+        public string Path
+        {
+            get => path;
+            set => path = value;
+        }
 
 #if UNITY_EDITOR
         private void Update()
         {
-            GameObject prefab = PrefabUtility.GetCorrespondingObjectFromSource(gameObject);
-            string newPath = ReferencesDatabase.GetPath(prefab);
-            if (path != newPath)
+            if (!Application.isPlaying)
             {
-                path = newPath;
-                EditorUtility.SetDirty(this);
+                GameObject prefab = PrefabUtility.GetCorrespondingObjectFromSource(gameObject);
+                string newPath = ReferencesDatabase.GetPath(prefab);
+                if (path != newPath && !string.IsNullOrEmpty(newPath))
+                {
+                    path = newPath;
+                    EditorUtility.SetDirty(this);
+                }
             }
         }
 #endif

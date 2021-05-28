@@ -6,13 +6,13 @@ namespace Popcron.SceneStaging
     {
         protected override void Save(Component mapObject, VisualEffect visualEffect)
         {
-            mapObject.Add(nameof(visualEffect.initialEventID), visualEffect.initialEventID);
-            mapObject.Add(nameof(visualEffect.initialEventName), visualEffect.initialEventName);
-            mapObject.Add(nameof(visualEffect.pause), visualEffect.pause);
-            mapObject.Add(nameof(visualEffect.playRate), visualEffect.playRate);
-            mapObject.Add(nameof(visualEffect.resetSeedOnPlay), visualEffect.resetSeedOnPlay);
-            mapObject.Add(nameof(visualEffect.startSeed), visualEffect.startSeed);
-            mapObject.Add(nameof(visualEffect.visualEffectAsset), visualEffect.visualEffectAsset);
+            mapObject.Set(nameof(visualEffect.initialEventID), visualEffect.initialEventID);
+            mapObject.Set(nameof(visualEffect.initialEventName), visualEffect.initialEventName);
+            mapObject.Set(nameof(visualEffect.pause), visualEffect.pause);
+            mapObject.Set(nameof(visualEffect.playRate), visualEffect.playRate);
+            mapObject.Set(nameof(visualEffect.resetSeedOnPlay), visualEffect.resetSeedOnPlay);
+            mapObject.Set(nameof(visualEffect.startSeed), visualEffect.startSeed);
+            mapObject.Set(nameof(visualEffect.visualEffectAsset), visualEffect.visualEffectAsset);
         }
 
         protected override void Load(Component mapObject, VisualEffect visualEffect)

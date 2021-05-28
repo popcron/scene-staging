@@ -48,7 +48,7 @@ namespace Popcron.SceneStaging
             for (int i = 0; i < variablesCount; i++)
             {
                 Variable variable = variables[i];
-                component.Add(variable);
+                component.Set(variable);
             }
         }
 

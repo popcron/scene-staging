@@ -6,13 +6,13 @@ namespace Popcron.SceneStaging
     {
         protected override void Save(Component mapObject, OffMeshLink offMeshLink)
         {
-            mapObject.Add(nameof(offMeshLink.activated), offMeshLink.activated);
-            mapObject.Add(nameof(offMeshLink.area), offMeshLink.area);
-            mapObject.Add(nameof(offMeshLink.autoUpdatePositions), offMeshLink.autoUpdatePositions);
-            mapObject.Add(nameof(offMeshLink.biDirectional), offMeshLink.biDirectional);
-            mapObject.Add(nameof(offMeshLink.costOverride), offMeshLink.costOverride);
-            mapObject.Add(nameof(offMeshLink.endTransform), Stage.GetProp(offMeshLink.endTransform)?.ID ?? -1);
-            mapObject.Add(nameof(offMeshLink.startTransform), Stage.GetProp(offMeshLink.startTransform)?.ID ?? -1);
+            mapObject.Set(nameof(offMeshLink.activated), offMeshLink.activated);
+            mapObject.Set(nameof(offMeshLink.area), offMeshLink.area);
+            mapObject.Set(nameof(offMeshLink.autoUpdatePositions), offMeshLink.autoUpdatePositions);
+            mapObject.Set(nameof(offMeshLink.biDirectional), offMeshLink.biDirectional);
+            mapObject.Set(nameof(offMeshLink.costOverride), offMeshLink.costOverride);
+            mapObject.Set(nameof(offMeshLink.endTransform), Stage.GetProp(offMeshLink.endTransform)?.ID ?? -1);
+            mapObject.Set(nameof(offMeshLink.startTransform), Stage.GetProp(offMeshLink.startTransform)?.ID ?? -1);
         }
 
         protected override void Load(Component mapObject, OffMeshLink navMeshLink)

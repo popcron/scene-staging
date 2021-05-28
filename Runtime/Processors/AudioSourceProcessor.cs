@@ -7,32 +7,32 @@ namespace Popcron.SceneStaging
     {
         protected override void Save(Component component, AudioSource audioSource)
         {
-            component.Add(nameof(AudioSource.bypassEffects), audioSource.bypassEffects);
-            component.Add(nameof(AudioSource.bypassListenerEffects), audioSource.bypassListenerEffects);
-            component.Add(nameof(AudioSource.bypassReverbZones), audioSource.bypassReverbZones);
-            component.Add(nameof(AudioSource.clip), audioSource.clip);
-            component.Add(nameof(AudioSource.dopplerLevel), audioSource.dopplerLevel);
-            component.Add(nameof(AudioSource.ignoreListenerPause), audioSource.ignoreListenerPause);
-            component.Add(nameof(AudioSource.ignoreListenerVolume), audioSource.ignoreListenerVolume);
-            component.Add(nameof(AudioSource.loop), audioSource.loop);
-            component.Add(nameof(AudioSource.maxDistance), audioSource.maxDistance);
-            component.Add(nameof(AudioSource.minDistance), audioSource.minDistance);
-            component.Add(nameof(AudioSource.mute), audioSource.mute);
-            component.Add(nameof(AudioSource.outputAudioMixerGroup), audioSource.outputAudioMixerGroup);
-            component.Add(nameof(AudioSource.panStereo), audioSource.panStereo);
-            component.Add(nameof(AudioSource.pitch), audioSource.pitch);
-            component.Add(nameof(AudioSource.playOnAwake), audioSource.playOnAwake);
-            component.Add(nameof(AudioSource.priority), audioSource.priority);
-            component.Add(nameof(AudioSource.reverbZoneMix), audioSource.reverbZoneMix);
-            component.Add(nameof(AudioSource.rolloffMode), audioSource.rolloffMode);
-            component.Add(nameof(AudioSource.spatialBlend), audioSource.spatialBlend);
-            component.Add(nameof(AudioSource.spatialize), audioSource.spatialize);
-            component.Add(nameof(AudioSource.spatializePostEffects), audioSource.spatializePostEffects);
-            component.Add(nameof(AudioSource.spread), audioSource.spread);
-            component.Add(nameof(AudioSource.time), audioSource.time);
-            component.Add(nameof(AudioSource.timeSamples), audioSource.timeSamples);
-            component.Add(nameof(AudioSource.velocityUpdateMode), audioSource.velocityUpdateMode);
-            component.Add(nameof(AudioSource.volume), audioSource.volume);
+            component.Set(nameof(AudioSource.bypassEffects), audioSource.bypassEffects);
+            component.Set(nameof(AudioSource.bypassListenerEffects), audioSource.bypassListenerEffects);
+            component.Set(nameof(AudioSource.bypassReverbZones), audioSource.bypassReverbZones);
+            component.Set(nameof(AudioSource.clip), audioSource.clip);
+            component.Set(nameof(AudioSource.dopplerLevel), audioSource.dopplerLevel);
+            component.Set(nameof(AudioSource.ignoreListenerPause), audioSource.ignoreListenerPause);
+            component.Set(nameof(AudioSource.ignoreListenerVolume), audioSource.ignoreListenerVolume);
+            component.Set(nameof(AudioSource.loop), audioSource.loop);
+            component.Set(nameof(AudioSource.maxDistance), audioSource.maxDistance);
+            component.Set(nameof(AudioSource.minDistance), audioSource.minDistance);
+            component.Set(nameof(AudioSource.mute), audioSource.mute);
+            component.Set(nameof(AudioSource.outputAudioMixerGroup), audioSource.outputAudioMixerGroup);
+            component.Set(nameof(AudioSource.panStereo), audioSource.panStereo);
+            component.Set(nameof(AudioSource.pitch), audioSource.pitch);
+            component.Set(nameof(AudioSource.playOnAwake), audioSource.playOnAwake);
+            component.Set(nameof(AudioSource.priority), audioSource.priority);
+            component.Set(nameof(AudioSource.reverbZoneMix), audioSource.reverbZoneMix);
+            component.Set(nameof(AudioSource.rolloffMode), audioSource.rolloffMode);
+            component.Set(nameof(AudioSource.spatialBlend), audioSource.spatialBlend);
+            component.Set(nameof(AudioSource.spatialize), audioSource.spatialize);
+            component.Set(nameof(AudioSource.spatializePostEffects), audioSource.spatializePostEffects);
+            component.Set(nameof(AudioSource.spread), audioSource.spread);
+            component.Set(nameof(AudioSource.time), audioSource.time);
+            component.Set(nameof(AudioSource.timeSamples), audioSource.timeSamples);
+            component.Set(nameof(AudioSource.velocityUpdateMode), audioSource.velocityUpdateMode);
+            component.Set(nameof(AudioSource.volume), audioSource.volume);
         }
 
         protected override void Load(Component component, AudioSource audioSource)

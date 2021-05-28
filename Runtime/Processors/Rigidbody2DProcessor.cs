@@ -6,15 +6,15 @@ namespace Popcron.SceneStaging
     {
         protected override void Save(Component component, Rigidbody2D rigidbody)
         {
-            component.Add(nameof(rigidbody.angularDrag), rigidbody.angularDrag);
-            component.Add(nameof(rigidbody.collisionDetectionMode), rigidbody.collisionDetectionMode);
-            component.Add(nameof(rigidbody.constraints), rigidbody.constraints);
-            component.Add(nameof(rigidbody.drag), rigidbody.drag);
-            component.Add(nameof(rigidbody.freezeRotation), rigidbody.freezeRotation);
-            component.Add(nameof(rigidbody.interpolation), rigidbody.interpolation);
-            component.Add(nameof(rigidbody.isKinematic), rigidbody.isKinematic);
-            component.Add(nameof(rigidbody.mass), rigidbody.mass);
-            component.Add(nameof(rigidbody.gravityScale), rigidbody.gravityScale);
+            component.Set(nameof(rigidbody.angularDrag), rigidbody.angularDrag);
+            component.Set(nameof(rigidbody.collisionDetectionMode), rigidbody.collisionDetectionMode);
+            component.Set(nameof(rigidbody.constraints), rigidbody.constraints);
+            component.Set(nameof(rigidbody.drag), rigidbody.drag);
+            component.Set(nameof(rigidbody.freezeRotation), rigidbody.freezeRotation);
+            component.Set(nameof(rigidbody.interpolation), rigidbody.interpolation);
+            component.Set(nameof(rigidbody.isKinematic), rigidbody.isKinematic);
+            component.Set(nameof(rigidbody.mass), rigidbody.mass);
+            component.Set(nameof(rigidbody.gravityScale), rigidbody.gravityScale);
         }
 
         protected override void Load(Component component, Rigidbody2D rigidbody)
