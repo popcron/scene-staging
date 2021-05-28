@@ -6,6 +6,7 @@ using UnityEditor;
 
 namespace Popcron.SceneStaging
 {
+    [NotStageSerialized]
     public class Prefab : MonoBehaviour
     {
         [SerializeField]

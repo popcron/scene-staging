@@ -91,9 +91,9 @@ namespace Popcron.SceneStaging
                         continue;
                     }
 
-                    //ignore if it has a not map saved attribute
-                    bool notMapSaved = field.GetCustomAttribute<NotMapSavedAttribute>() != null;
-                    if (notMapSaved)
+                    //ignore if it has a not stage saved attribute
+                    bool notStageSaved = field.GetCustomAttribute<NotStageSerializedAttribute>() is not null;
+                    if (notStageSaved)
                     {
                         continue;
                     }
@@ -106,7 +106,7 @@ namespace Popcron.SceneStaging
                     else if (!field.IsPublic)
                     {
                         //if its private but has serialized attributes, then add it
-                        bool serializeField = field.GetCustomAttribute<SerializeField>() != null;
+                        bool serializeField = field.GetCustomAttribute<SerializeField>() is not null;
                         if (serializeField)
                         {
                             fields.Add(field);

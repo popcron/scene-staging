@@ -595,7 +595,7 @@ namespace Popcron.SceneStaging
                     ComponentProcessor processor = ComponentProcessor.Get<GameObject>();
                     if (processor is not null)
                     {
-                        Component component = prop.AddComponent("UnityEngine.GameObject");
+                        Component component = prop.AddComponent<GameObject>();
                         Object unityComponent = processor.GetComponent(component, gameObject);
                         processor.Stage = stage;
                         processor.SaveComponent(component, unityComponent);
@@ -608,6 +608,12 @@ namespace Popcron.SceneStaging
                     {
                         Object component = components[c];
                         Type componentType = component.GetType();
+                        bool notStageSerialized = componentType.GetCustomAttribute<NotStageSerializedAttribute>() is not null;
+                        if (notStageSerialized)
+                        {
+                            continue;
+                        }
+
                         processor = ComponentProcessor.Get(componentType);
                         if (processor is not null)
                         {

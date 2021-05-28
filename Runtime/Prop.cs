@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Popcron.SceneStaging
 {
@@ -66,13 +67,13 @@ namespace Popcron.SceneStaging
         {
             get
             {
-                Component component = GetOrAddComponent("$Prefab");
+                Component component = GetOrAddComponent("$prefab");
                 PrefabInformation prefabInformation = new PrefabInformation(component);
                 return prefabInformation;
             }
             set
             {
-                Component component = GetOrAddComponent("$Prefab");
+                Component component = GetOrAddComponent("$prefab");
                 component.Clear();
                 value.Write(component);
             }
@@ -179,9 +180,11 @@ namespace Popcron.SceneStaging
         public Component AddComponent(string fullTypeName, IList<Variable> variables = null)
         {
             Component newComponent = new Component(fullTypeName, variables);
-            components.Add(newComponent);
+            AddComponent(newComponent);
             return newComponent;
         }
+
+        public Component AddComponent<T>(IList<Variable> variables = null) where T : Object => AddComponent(typeof(T).FullName, variables);
 
         public void AddComponent(Component component)
         {
@@ -206,7 +209,7 @@ namespace Popcron.SceneStaging
         /// <summary>
         /// Returns the first component of this type within this prop.
         /// </summary>
-        public Component GetComponent<T>() where T : UnityEngine.Object
+        public Component GetComponent<T>() where T : Object
         {
             Type type = typeof(T);
             int componentCount = components.Count;
