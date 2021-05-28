@@ -6,7 +6,7 @@ using UnityEditor;
 
 namespace Popcron.SceneStaging
 {
-    [NotStageSerialized]
+    [NotStageSerialized, ExecuteAlways]
     public class Prefab : MonoBehaviour
     {
         [SerializeField]
@@ -14,16 +14,17 @@ namespace Popcron.SceneStaging
 
         public string Path => path;
 
-        private void OnValidate()
-        {
 #if UNITY_EDITOR
+        private void Update()
+        {
             GameObject prefab = PrefabUtility.GetCorrespondingObjectFromSource(gameObject);
             string newPath = ReferencesDatabase.GetPath(prefab);
             if (path != newPath)
             {
                 path = newPath;
+                EditorUtility.SetDirty(this);
             }
-#endif
         }
+#endif
     }
 }
