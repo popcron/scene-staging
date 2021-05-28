@@ -26,7 +26,7 @@ namespace Popcron.SceneStaging
             {
                 if (type is null)
                 {
-                    type = Utils.GetType(fullTypeName);
+                    type = StageUtils.GetType(fullTypeName);
                 }
 
                 return type;

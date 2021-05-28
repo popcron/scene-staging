@@ -32,7 +32,7 @@ namespace Popcron.SceneStaging
             else
             {
                 Type type = value.GetType();
-                TypeType typeType = Utils.GetTypeType(type);
+                TypeType typeType = StageUtils.GetTypeType(type);
                 if (IsCollection(type))
                 {
                     JArray jsonArray = new JArray();
@@ -278,7 +278,7 @@ namespace Popcron.SceneStaging
                 return null;
             }
 
-            TypeType typeType = Utils.GetTypeType(type);
+            TypeType typeType = StageUtils.GetTypeType(type);
             if (typeType == TypeType.Enum)
             {
                 if (int.TryParse(raw, out int index))

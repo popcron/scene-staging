@@ -4,8 +4,8 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using Random = System.Random;
-using System.Threading.Tasks;
-using System.Threading;
+using UnityEngine.SceneManagement;
+using Object = UnityEngine.Object;
 
 #if UNITY_EDITOR
 using UnityEditor.Callbacks;
@@ -14,8 +14,9 @@ using UnityEditor;
 
 namespace Popcron.SceneStaging
 {
-    public class Utils
+    public class StageUtils
     {
+        private static Object[] resources;
         private static Random random;
         private static Dictionary<string, Type> fullTypeNameToType;
         private static Dictionary<Type, FieldInfo[]> typeToFieldInfos;
@@ -194,6 +195,51 @@ namespace Popcron.SceneStaging
             }
         }
 
+#if UNITY_EDITOR
+        /// <summary>
+        /// Returns the real path of the asset.
+        /// Editor only.
+        /// </summary>
+        public static string GetAssetPath(Object asset)
+        {
+            if (resources is null)
+            {
+                resources = Resources.FindObjectsOfTypeAll(typeof(Object));
+            }
+
+            int resourcesLength = resources.Length;
+            for (int i = resourcesLength - 1; i >= 0; i--)
+            {
+                ref Object resourceAsset = ref resources[i];
+                if (resourceAsset == asset)
+                {
+                    string path = AssetDatabase.GetAssetPath(resourceAsset);
+                    if (!string.IsNullOrEmpty(path))
+                    {
+                        Object[] subAssets = AssetDatabase.LoadAllAssetsAtPath(path);
+                        for (int a = 0; a < subAssets.Length; a++)
+                        {
+                            ref Object subAsset = ref subAssets[a];
+                            if (subAsset == asset)
+                            {
+                                return $"{path}/{asset.name}";
+                            }
+                        }
+
+                        return path;
+                    }
+                }
+            }
+
+            return null;
+        }
+#endif
+
+        public static void SetActiveScene(Scene scene)
+        {
+            SceneManager.SetActiveScene(scene);
+        }
+
         public static IEnumerable<Type> GetAllAssignableFrom<T>()
         {
             if (all is null)
@@ -210,6 +256,11 @@ namespace Popcron.SceneStaging
                 }
             }
         }
+
+        /// <summary>
+        /// Returns a new unique ID for stages.
+        /// </summary>
+        public static string GetID(int? seed = null) => RandomString(16, seed);
 
         public static string RandomString(int length, int? seed)
         {

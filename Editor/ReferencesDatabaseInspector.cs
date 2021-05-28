@@ -27,7 +27,7 @@ namespace Popcron.SceneStaging.UnityEditor
 
                 if (assetProperty.objectReferenceValue)
                 {
-                    pathProperty.stringValue = AssetDatabase.GetAssetPath(assetProperty.objectReferenceValue);
+                    pathProperty.stringValue = StageUtils.GetAssetPath(assetProperty.objectReferenceValue);
                 }
                 else
                 {

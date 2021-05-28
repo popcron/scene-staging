@@ -20,7 +20,7 @@ namespace Popcron.SceneStaging
         {
             if (unityComponent is MonoBehaviour monoBehaviour)
             {
-                FieldInfo[] fields = Utils.GetFields(monoBehaviour.GetType());
+                FieldInfo[] fields = StageUtils.GetFields(monoBehaviour.GetType());
                 int fieldsLength = fields.Length;
                 for (int i = 0; i < fieldsLength; i++)
                 {
@@ -113,7 +113,7 @@ namespace Popcron.SceneStaging
         {
             if (unityComponent is MonoBehaviour mb)
             {
-                FieldInfo[] fields = Utils.GetFields(mb.GetType());
+                FieldInfo[] fields = StageUtils.GetFields(mb.GetType());
                 int fieldsLength = fields.Length;
                 for (int i = fieldsLength - 1; i >= 0; i--)
                 {
@@ -138,7 +138,7 @@ namespace Popcron.SceneStaging
                                     {
                                         string pathToPrefab = splits[1];
                                         string fullTypeName = splits[2];
-                                        Type type = Utils.GetType(fullTypeName);
+                                        Type type = StageUtils.GetType(fullTypeName);
                                         if (type is not null)
                                         {
                                             Object prefab = ReferencesDatabase.Get(type, pathToPrefab);

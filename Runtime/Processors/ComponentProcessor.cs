@@ -26,7 +26,7 @@ namespace Popcron.SceneStaging
                 if (all is null)
                 {
                     List<ComponentProcessor> allList = new List<ComponentProcessor>();
-                    foreach (Type type in Utils.GetAllAssignableFrom<ComponentProcessor>())
+                    foreach (Type type in StageUtils.GetAllAssignableFrom<ComponentProcessor>())
                     {
                         if (!type.IsAbstract)
                         {

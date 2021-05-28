@@ -2,6 +2,7 @@
 using Object = UnityEngine.Object;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -14,7 +15,6 @@ namespace Popcron.SceneStaging
     {
         private static ReferencesDatabase current;
         private static Dictionary<int, string> assetToPath;
-        private static Object[] resources;
 
         /// <summary>
         /// The current settings data being used.
@@ -25,7 +25,7 @@ namespace Popcron.SceneStaging
             {
                 if (!current)
                 {
-                    current = GetOrCreate();
+                    Initialize();
                 }
 
                 return current;
@@ -35,35 +35,64 @@ namespace Popcron.SceneStaging
         [SerializeField]
         private List<Reference> references = new List<Reference>();
 
-        /// <summary>
-        /// Returns an existing console settings asset, or creates a new one if none exist.
-        /// </summary>
-        public static ReferencesDatabase GetOrCreate()
+        private void OnEnable()
         {
-            ReferencesDatabase[] allDatabases = Resources.LoadAll<ReferencesDatabase>("");
-            if (allDatabases.Length > 0)
+            Sanitize();
+            current = this;
+            assetToPath = new Dictionary<int, string>();
+            int referencesCount = references.Count;
+            for (int i = 0; i < referencesCount; i++)
             {
-                return allDatabases[0];
+                Reference reference = references[i];
+                assetToPath[reference.Asset.GetInstanceID()] = reference.Path;
+            }
+        }
+
+        private void Sanitize()
+        {
+            //remove duplicates and empties
+            bool changesMade = false;
+            for (int i = references.Count - 1; i >= 0; i--)
+            {
+                Reference reference = references[i];
+                if (!reference.Asset)
+                {
+                    references.RemoveAt(i);
+                    changesMade = true;
+                }
+                else
+                {
+                    int count = CountDuplicates(reference.Asset);
+                    if (count > 1)
+                    {
+                        references.RemoveAt(i);
+                        changesMade = true;
+                    }
+                }
             }
 
+            if (changesMade)
+            {
 #if UNITY_EDITOR
-            //couldnt find one, so create
-            Debug.Log("couldnt find existing one");
-            if (!AssetDatabase.IsValidFolder("Assets/Resources"))
+                EditorUtility.SetDirty(current);
+#endif
+            }
+        }
+
+        private int CountDuplicates(Object asset)
+        {
+            int count = 0;
+            int referencesCount = references.Count;
+            for (int i = referencesCount - 1; i >= 0; i--)
             {
-                AssetDatabase.CreateFolder("Assets", "Resources");
+                Reference reference = references[i];
+                if (reference.Asset == asset)
+                {
+                    count++;
+                }
             }
 
-            //make a file here
-            ReferencesDatabase newDatabase = CreateInstance<ReferencesDatabase>();
-            newDatabase.name = "Database";
-            AssetDatabase.CreateAsset(newDatabase, "Assets/Resources/Database.asset");
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate);
-            return GetOrCreate();
-#endif
-
-            return null;
+            return count;
         }
 
         /// <summary>
@@ -76,9 +105,14 @@ namespace Popcron.SceneStaging
                 return null;
             }
 
-            if (assetToPath is null)
+            if (assetToPath is null || !current)
             {
                 Initialize();
+            }
+
+            if (assetToPath is null)
+            {
+                return null;
             }
 
             int instanceId = asset.GetInstanceID();
@@ -88,27 +122,14 @@ namespace Popcron.SceneStaging
             }
 
 #if UNITY_EDITOR
-            if (resources is null)
+            string realPath = StageUtils.GetAssetPath(asset);
+            if (!string.IsNullOrEmpty(realPath))
             {
-                resources = Resources.FindObjectsOfTypeAll(typeof(Object));
-            }
-
-            int resourcesLength = resources.Length;
-            for (int i = resourcesLength - 1; i >= 0; i--)
-            {
-                ref Object resourceAsset = ref resources[i];
-                if (resourceAsset == asset)
-                {
-                    string path = AssetDatabase.GetAssetPath(resourceAsset);
-                    if (!string.IsNullOrEmpty(path))
-                    {
-                        Reference newReference = new Reference(path, asset);
-                        current.references.Add(newReference);
-                        EditorUtility.SetDirty(current);
-                        assetToPath[asset.GetInstanceID()] = path;
-                        return path;
-                    }
-                }
+                Reference newReference = new Reference(realPath, asset);
+                current.references.Add(newReference);
+                EditorUtility.SetDirty(current);
+                assetToPath[asset.GetInstanceID()] = realPath;
+                return realPath;
             }
 #endif
 
@@ -117,19 +138,53 @@ namespace Popcron.SceneStaging
 
 #if UNITY_EDITOR
         [DidReloadScripts]
-#endif
         [RuntimeInitializeOnLoadMethod]
         private static void Initialize()
         {
-            assetToPath = new Dictionary<int, string>();
-            ReferencesDatabase instance = Current;
-            int referencesCount = instance.references.Count;
-            for (int i = 0; i < referencesCount; i++)
+            List<Object> preloadedAssets = PlayerSettings.GetPreloadedAssets().ToList();
+            bool notPreloadedYet = true;
+            foreach (Object preloadedAsset in preloadedAssets)
             {
-                Reference reference = instance.references[i];
-                assetToPath[reference.Asset.GetInstanceID()] = reference.Path;
+                if (preloadedAsset is ReferencesDatabase referencesDatabase)
+                {
+                    notPreloadedYet = false;
+                    return;
+                }
+            }
+
+            if (notPreloadedYet)
+            {
+                string[] guids = AssetDatabase.FindAssets($"t:{typeof(ReferencesDatabase).FullName}");
+                ReferencesDatabase database = null;
+                if (guids.Length == 0)
+                {
+                    database = CreateInstance<ReferencesDatabase>();
+                    AssetDatabase.CreateAsset(database, "Assets/Database.asset");
+                }
+                else
+                {
+                    string path = AssetDatabase.GUIDToAssetPath(guids[0]);
+                    database = AssetDatabase.LoadAssetAtPath<ReferencesDatabase>(path);
+                }
+
+                //add to end
+                preloadedAssets.Add(database);
+
+                //remove any empties
+                for (int i = preloadedAssets.Count - 1; i >= 0; i--)
+                {
+                    if (!preloadedAssets[i])
+                    {
+                        preloadedAssets.RemoveAt(i);
+                    }
+                }
+
+                PlayerSettings.SetPreloadedAssets(preloadedAssets.ToArray());
             }
         }
+#else   
+        private static void Initialize() { }
+#endif
 
         /// <summary>
         /// Returns an asset with this type at this path.
@@ -157,7 +212,7 @@ namespace Popcron.SceneStaging
         [Serializable]
         public class Reference
         {
-            [SerializeField, HideInInspector]
+            [SerializeField]
             private string path;
 
             [SerializeField]

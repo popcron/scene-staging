@@ -43,7 +43,7 @@ namespace Popcron.SceneStaging
 
         public Stage(string displayName)
         {
-            id = StageBuilder.GetID();
+            id = StageUtils.GetID();
             this.displayName = displayName;
         }
 
