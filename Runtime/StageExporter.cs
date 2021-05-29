@@ -21,8 +21,6 @@ namespace Popcron.SceneStaging
 {
     public class StageExporter
     {
-
-
 #if UNITY_EDITOR
         /// <summary>
         /// Exports this scene into a new stage.
