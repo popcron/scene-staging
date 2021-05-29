@@ -6,7 +6,7 @@ Use the + inside the Package Manager window and add this URL:
 ```json
 "com.popcron.scene-staging": "https://github.com/popcron/scene-staging.git"
 ```
-Or add id to your `packages.json` file manually (located inside the project's Packages folder).
+Or add it to your `packages.json` file manually (located inside the project's Packages folder).
 
 ## Example
 ```cs
