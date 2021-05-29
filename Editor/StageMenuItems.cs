@@ -21,7 +21,7 @@ namespace Popcron.SceneStaging.UnityEditor
             {
                 string previousScene = SceneManager.GetActiveScene().path;
                 Stage stage = StageExporter.Export(sceneAsset);
-                if (stage is not null)
+                if (stage != null)
                 {
                     string assetPath = AssetDatabase.GetAssetPath(sceneAsset);
                     assetPath = Path.ChangeExtension(assetPath, ".asset");
@@ -59,7 +59,7 @@ namespace Popcron.SceneStaging.UnityEditor
             {
                 string previousScene = SceneManager.GetActiveScene().path;
                 Stage stage = StageExporter.Export(sceneAsset);
-                if (stage is not null)
+                if (stage != null)
                 {
                     string json = stage.ToJson();
                     string assetPath = AssetDatabase.GetAssetPath(sceneAsset);
@@ -93,7 +93,7 @@ namespace Popcron.SceneStaging.UnityEditor
                 stage = stageAsset.Stage;   
             }
 
-            if (stage is not null)
+            if (stage != null)
             {
                 EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo();
                 Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
