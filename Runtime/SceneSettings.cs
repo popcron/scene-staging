@@ -133,7 +133,7 @@ namespace Popcron.SceneStaging
 
             //custom reflection changes from Cubemap to Texture
             PropertyInfo customReflection = typeof(RenderSettings).GetProperty(nameof(RenderSettings.customReflection));
-            customReflection.SetValue(null, customReflection);
+            customReflection.SetValue(null, this.customReflection);
 
             RenderSettings.defaultReflectionMode = defaultReflectionMode;
             RenderSettings.defaultReflectionResolution = defaultReflectionResolution;

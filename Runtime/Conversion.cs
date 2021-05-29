@@ -244,6 +244,42 @@ namespace Popcron.SceneStaging
             }
         }
 
+        private static long ToLong(ref string text)
+        {
+            int length = text.Length;
+            long origin = '0';
+            long number = 0;
+            bool negative = false;
+            for (int i = 0; i < length; i++)
+            {
+                char c = text[i];
+                if (c != '-')
+                {
+                    number = number * 10 + (c - origin);
+                }
+                else
+                {
+                    negative = true;
+                }
+            }
+
+            return negative ? -number : number;
+        }
+
+        private static ulong ToULong(ref string text)
+        {
+            int length = text.Length;
+            ulong origin = '0';
+            ulong number = 0;
+            for (int i = 0; i < length; i++)
+            {
+                char c = text[i];
+                number = number * 10 + (c - origin);
+            }
+
+            return number;
+        }
+
         private static T[] ExtractParts<T>(string raw)
         {
             //remove garbage characters
@@ -308,15 +344,15 @@ namespace Popcron.SceneStaging
                 }
                 else if (type == typeof(byte))
                 {
-                    return byte.Parse(raw);
+                    return (byte)ToULong(ref raw);
                 }
                 else if (type == typeof(sbyte))
                 {
-                    return sbyte.Parse(raw);
+                    return (sbyte)ToLong(ref raw);
                 }
                 else if (type == typeof(short))
                 {
-                    return short.Parse(raw);
+                    return (short)ToLong(ref raw);
                 }
                 else if (type == typeof(ushort))
                 {
@@ -324,19 +360,19 @@ namespace Popcron.SceneStaging
                 }
                 else if (type == typeof(int))
                 {
-                    return int.Parse(raw);
+                    return (int)ToLong(ref raw);
                 }
                 else if (type == typeof(uint))
                 {
-                    return uint.Parse(raw);
+                    return (uint)ToULong(ref raw);
                 }
                 else if (type == typeof(long))
                 {
-                    return long.Parse(raw);
+                    return ToLong(ref raw);
                 }
                 else if (type == typeof(ulong))
                 {
-                    return ulong.Parse(raw);
+                    return ToULong(ref raw);
                 }
                 else if (type == typeof(float))
                 {
@@ -415,7 +451,7 @@ namespace Popcron.SceneStaging
                 }
                 else if (type == typeof(LayerMask))
                 {
-                    return (LayerMask)int.Parse(raw);
+                    return (LayerMask)(int)ToLong(ref raw);
                 }
 
                 try
@@ -465,7 +501,7 @@ namespace Popcron.SceneStaging
                 }
             }
 
-            return default;
+            return null;
         }
 
         private static bool IsCollection(Type type)
@@ -568,8 +604,11 @@ namespace Popcron.SceneStaging
                         {
                             foreach (JToken prop in props)
                             {
-                                int propId = int.Parse(prop["id"]?.ToString() ?? "-1");
-                                int propParent = int.Parse(prop["parent"]?.ToString() ?? "-1");
+                                string propIdString = prop["id"]?.ToString() ?? "-1";
+                                string propParentString = prop["parent"]?.ToString() ?? "-1";
+                                int propId = (int)ToLong(ref propIdString);
+                                int propParent = (int)ToLong(ref propParentString);
+
                                 Prop propAdded = map.AddProp(propId, propParent);
 
                                 //add the components too
