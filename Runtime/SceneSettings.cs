@@ -1,6 +1,9 @@
+using System;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.Rendering;
+using Object = UnityEngine.Object;
 
 namespace Popcron.SceneStaging
 {
@@ -30,7 +33,7 @@ namespace Popcron.SceneStaging
         public Color ambientLight;
         
         [HideInInspector]
-        public Texture customReflection;
+        public Object customReflection;
 
         [HideInInspector]
         public DefaultReflectionMode defaultReflectionMode;
@@ -127,7 +130,11 @@ namespace Popcron.SceneStaging
             RenderSettings.ambientGroundColor = ambientGroundColor;
             RenderSettings.ambientIntensity = ambientIntensity;
             RenderSettings.ambientLight = ambientLight;
-            RenderSettings.customReflection = customReflection;
+
+            //custom reflection changes from Cubemap to Texture
+            PropertyInfo customReflection = typeof(RenderSettings).GetProperty(nameof(RenderSettings.customReflection));
+            customReflection.SetValue(null, customReflection);
+
             RenderSettings.defaultReflectionMode = defaultReflectionMode;
             RenderSettings.defaultReflectionResolution = defaultReflectionResolution;
             RenderSettings.flareFadeSpeed = flareFadeSpeed;
