@@ -22,16 +22,23 @@ namespace Popcron.SceneStaging
     {
         private static float buildProgress = 0f;
         private static Stage stage;
+        private static int buildSpeed = 5;
         private static StageBuildStep buildStep = StageBuildStep.Inactive;
         private static int index;
         private static PropsCollection propObjects = new PropsCollection();
 
-        public delegate void StageBuiltDelegate(Stage stage);
+        public delegate void StageFinishedBuildingDelegate(Stage stage);
+        public delegate void StageStartBuildingDelegate(Stage stage);
 
         /// <summary>
         /// Occurs when a stage has been finished being built.
         /// </summary>
-        public static StageBuiltDelegate OnBuiltStage { get; set; }
+        public static StageFinishedBuildingDelegate OnBuiltStage { get; set; }
+
+        /// <summary>
+        /// Occurs when a stage building process has just started.
+        /// </summary>
+        public static StageStartBuildingDelegate OnStartBuilding { get; set; }
 
         public static StageBuildStep BuildStep
         {
@@ -80,31 +87,38 @@ namespace Popcron.SceneStaging
 
         private static void OnUpdate()
         {
-            if (buildStep == StageBuildStep.Initializing)
+            if (buildStep != StageBuildStep.Inactive)
             {
-                CreateStageScene();
-                Initializing();
-            }
-            else if (buildStep == StageBuildStep.CreatingProps)
-            {
-                CreatingProps();
-            }
-            else if (buildStep == StageBuildStep.ParentObjects)
-            {
-                ParentObjects();
-            }
-            else if (buildStep == StageBuildStep.CreateComponents)
-            {
-                CreateComponents();
-            }
-            else if (buildStep == StageBuildStep.LoadComponents)
-            {
-                LoadComponents();
-            }
-            else if (buildStep == StageBuildStep.FinishedBuilding)
-            {
-                FinishedBuilding();
-                buildStep = StageBuildStep.Inactive;
+                for (int b = 0; b < buildSpeed; b++)
+                {
+                    if (buildStep == StageBuildStep.Initializing)
+                    {
+                        CreateStageScene();
+                        Initializing();
+                    }
+                    else if (buildStep == StageBuildStep.CreatingProps)
+                    {
+                        CreatingProps();
+                    }
+                    else if (buildStep == StageBuildStep.ParentObjects)
+                    {
+                        ParentObjects();
+                    }
+                    else if (buildStep == StageBuildStep.CreateComponents)
+                    {
+                        CreateComponents();
+                    }
+                    else if (buildStep == StageBuildStep.LoadComponents)
+                    {
+                        LoadComponents();
+                    }
+                    else if (buildStep == StageBuildStep.FinishedBuilding)
+                    {
+                        FinishedBuilding();
+                        buildStep = StageBuildStep.Inactive;
+                        break;
+                    }
+                }
             }
         }
 
@@ -406,16 +420,21 @@ namespace Popcron.SceneStaging
         /// <summary>
         /// Unloads any existing stages and initiates an asynchronous build process.
         /// </summary>
-        public static async void BuildAsync(Stage stageToBuild) => await BuildAsyncTask(stageToBuild);
+        public static async void BuildAsync(Stage stageToBuild, int speed = 5)
+        {
+            await BuildAsyncTask(stageToBuild, speed);
+        }
 
         /// <summary>
         /// Unloads any existing stages and initiates an asynchronous build process that can be awaited for.
         /// </summary>
-        public static async Task BuildAsyncTask(Stage stageToBuild)
+        public static async Task BuildAsyncTask(Stage stageToBuild, int speed = 5)
         {
             stage = stageToBuild;
+            buildSpeed = Mathf.Clamp(speed, 1, int.MaxValue);
             BuildStep = StageBuildStep.Initializing;
             buildProgress = 0f;
+            OnStartBuilding?.Invoke(stageToBuild);
 
             while (IsBuilding)
             {

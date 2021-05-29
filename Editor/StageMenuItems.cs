@@ -100,7 +100,7 @@ namespace Popcron.SceneStaging.UnityEditor
                 scene.name = stage.DisplayName;
 
                 await Task.Delay(1);
-                StageBuilder.BuildAsync(stage);
+                StageBuilder.BuildAsync(stage, int.MaxValue);
             }
         }
 
