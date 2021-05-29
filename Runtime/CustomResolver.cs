@@ -21,7 +21,7 @@ namespace Popcron.SceneStaging
                 bool serialize = field.IsPublic;
                 if (!serialize)
                 {
-                    if (field.GetCustomAttribute<SerializeField>() is not null)
+                    if (field.GetCustomAttribute<SerializeField>() != null)
                     {
                         serialize = true;
                     }
@@ -29,7 +29,7 @@ namespace Popcron.SceneStaging
 
                 if (serialize)
                 {
-                    if (field.GetCustomAttribute<NonSerializedAttribute>() is not null)
+                    if (field.GetCustomAttribute<NonSerializedAttribute>() != null)
                     {
                         continue;
                     }
@@ -41,7 +41,6 @@ namespace Popcron.SceneStaging
                 }
             }
 
-            PropertyInfo[] properties = type.GetProperties(Flags);
             return jsonProperties;
         }
     }

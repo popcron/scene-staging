@@ -93,7 +93,7 @@ namespace Popcron.SceneStaging
                     }
 
                     //ignore if it has a not stage saved attribute
-                    bool notStageSaved = field.GetCustomAttribute<NotStageSerializedAttribute>() is not null;
+                    bool notStageSaved = field.GetCustomAttribute<NotStageSerializedAttribute>() != null;
                     if (notStageSaved)
                     {
                         continue;
@@ -107,7 +107,7 @@ namespace Popcron.SceneStaging
                     else if (!field.IsPublic)
                     {
                         //if its private but has serialized attributes, then add it
-                        bool serializeField = field.GetCustomAttribute<SerializeField>() is not null;
+                        bool serializeField = field.GetCustomAttribute<SerializeField>() != null;
                         if (serializeField)
                         {
                             fields.Add(field);
@@ -136,7 +136,7 @@ namespace Popcron.SceneStaging
                 Initialize();
             }
 
-            if (type is not null && typeToFieldInfos.TryGetValue(type, out FieldInfo[] fields))
+            if (type != null && typeToFieldInfos.TryGetValue(type, out FieldInfo[] fields))
             {
                 return fields;
             }
@@ -271,7 +271,7 @@ namespace Popcron.SceneStaging
 
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
             Random r = random;
-            if (seed is not null)
+            if (seed != null)
             {
                 r = new Random(seed.Value);
             }

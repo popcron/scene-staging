@@ -56,7 +56,7 @@ namespace Popcron.SceneStaging
             this.fullTypeName = fullTypeName;
             this.variables = new List<Variable>();
 
-            if (variables is not null)
+            if (variables != null)
             {
                 this.variables.AddRange(variables);
             }

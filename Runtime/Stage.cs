@@ -207,7 +207,7 @@ namespace Popcron.SceneStaging
                 hashCode = hashCode * -1521134295 + id?.GetHashCode() ?? -1;
                 hashCode = hashCode * -1521134295 + displayName?.GetHashCode() ?? -1;
 
-                if (props is not null)
+                if (props != null)
                 {
                     int propsCount = props.Count;
                     for (int i = propsCount - 1; i >= 0; i--)

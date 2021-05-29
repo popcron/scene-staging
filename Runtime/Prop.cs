@@ -46,13 +46,13 @@ namespace Popcron.SceneStaging
 
         /// <summary>
         /// The game object that represents this prop.
-        /// This property is not serialized so do not rely on it during play mode in editor!
+        /// This property != serialized so do not rely on it during play mode in editor!
         /// </summary>
         public GameObject GameObject { get; set; }
 
         /// <summary>
         /// The transform that represents this prop.
-        /// This property is not serialized so do not rely on it during play mode in editor!
+        /// This property != serialized so do not rely on it during play mode in editor!
         /// </summary>
         public Transform Transform
         {

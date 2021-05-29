@@ -74,7 +74,7 @@ namespace Popcron.SceneStaging
             if (changesMade)
             {
 #if UNITY_EDITOR
-                EditorUtility.SetDirty(current);
+                EditorUtility.SetDirty(this);
 #endif
             }
         }

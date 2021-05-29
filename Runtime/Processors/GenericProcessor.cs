@@ -62,7 +62,7 @@ namespace Popcron.SceneStaging
                             if (value is Behaviour behaviour && behaviour)
                             {
                                 Prop prop = Stage.GetProp(behaviour.gameObject);
-                                if (prop is not null)
+                                if (prop != null)
                                 {
                                     int id = prop.ID;
                                     Behaviour[] components = behaviour.gameObject.GetComponents<Behaviour>();
@@ -139,7 +139,7 @@ namespace Popcron.SceneStaging
                                         string pathToPrefab = splits[1];
                                         string fullTypeName = splits[2];
                                         Type type = StageUtils.GetType(fullTypeName);
-                                        if (type is not null)
+                                        if (type != null)
                                         {
                                             Object prefab = ReferencesDatabase.Get(type, pathToPrefab);
                                             field.SetValue(mb, prefab);

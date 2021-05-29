@@ -288,7 +288,7 @@ namespace Popcron.SceneStaging
 
                     Type type = component.Type;
                     ComponentProcessor processor = ComponentProcessor.Get(type);
-                    if (processor is not null)
+                    if (processor != null)
                     {
                         processor.GetComponent(component, gameObject);
                     }
@@ -326,7 +326,7 @@ namespace Popcron.SceneStaging
                     Component component = prop[c];
                     Type type = component.Type;
                     ComponentProcessor processor = ComponentProcessor.Get(type);
-                    if (processor is not null)
+                    if (processor != null)
                     {
                         try
                         {
@@ -429,7 +429,7 @@ namespace Popcron.SceneStaging
         private static void CreateStageScene()
         {
             string sceneName = "New Stage";
-            if (stage is not null)
+            if (stage != null)
             {
                 sceneName = stage.DisplayName;
             }

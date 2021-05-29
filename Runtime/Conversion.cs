@@ -293,7 +293,7 @@ namespace Popcron.SceneStaging
                 try
                 {
                     object enumValue = Enum.Parse(type, raw, true);
-                    if (enumValue is not null)
+                    if (enumValue != null)
                     {
                         return enumValue;
                     }
@@ -578,7 +578,7 @@ namespace Popcron.SceneStaging
                                     {
                                         JToken component = components[c];
                                         JToken componentType = component["$type"];
-                                        if (componentType is not null)
+                                        if (componentType != null)
                                         {
                                             Component comp = new Component(componentType.ToString());
                                             JEnumerable<JProperty> properties = component.Children<JProperty>();

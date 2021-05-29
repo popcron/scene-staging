@@ -37,7 +37,7 @@ namespace Popcron.SceneStaging
                     {
                         string fileText = await reader.ReadToEndAsync();
                         Stage stage = await Conversion.FromJson(fileText);
-                        if (stage is not null)
+                        if (stage != null)
                         {
                             stages.Add(stage);
                         }

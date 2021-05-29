@@ -73,7 +73,7 @@ namespace Popcron.SceneStaging
         /// </summary>
         public virtual Object GetComponent(Component component, GameObject gameObject)
         {
-            if (component.Type is not null)
+            if (component.Type != null)
             {
                 if (component.Type.Equals(typeof(GameObject)))
                 {
@@ -148,7 +148,7 @@ namespace Popcron.SceneStaging
                     for (int i = 0; i < matchingCount; i++)
                     {
                         ComponentProcessor processor = matchingProcessors[i];
-                        if (processor is not GenericProcessor)
+                        if (!(processor is GenericProcessor))
                         {
                             typeProcessor = processor;
                             break;
@@ -177,7 +177,7 @@ namespace Popcron.SceneStaging
         public sealed override void SaveComponent(Component component, Object unityComponent)
         {
             T c = unityComponent as T;
-            if (component is not null && c)
+            if (component != null && c)
             {
                 try
                 {
@@ -193,7 +193,7 @@ namespace Popcron.SceneStaging
         public sealed override void LoadComponent(Component component, Object unityComponent)
         {
             T c = unityComponent as T;
-            if (component is not null && c)
+            if (component != null && c)
             {
                 try
                 {
