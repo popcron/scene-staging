@@ -7,6 +7,13 @@
   "dependencies": {
     "com.unity.nuget.newtonsoft-json": "2.0.0"
   },
+  "samples": [
+    {
+      "displayName": "Converting all on Play",
+      "description": "Converts all scenes to Stage assets when hitting the play button",
+      "path": "Samples~/ConvertAllScenes"
+    }
+  ],
   "keywords": [
     "scene",
     "json"
