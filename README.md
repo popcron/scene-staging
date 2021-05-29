@@ -10,7 +10,7 @@ Or add id to your `packages.json` file manually (located inside the project's Pa
 
 ## Example
 ```cs
-//convert the current scene to a stage and json object
+//convert the current scene to a stage and a json object
 Stage exportedStage = StageExporter.Export();
 string json = exportedStage.ToJson();
 
