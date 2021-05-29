@@ -400,7 +400,8 @@ namespace Popcron.SceneStaging
                     int[] ints = ExtractParts<int>(raw);
                     Vector3Int min = new Vector3Int(ints[0], ints[1], ints[2]);
                     Vector3Int max = new Vector3Int(ints[3], ints[4], ints[5]);
-                    return new BoundsInt((max + min) / 2, max - min);
+                    Vector3Int size = max - min;
+                    return new BoundsInt(min.x, min.y, min.z, size.x, size.y, size.z);
                 }
                 else if (type == typeof(Color))
                 {
