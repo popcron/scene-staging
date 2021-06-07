@@ -1,18 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
 using UnityComponent = UnityEngine.Component;
-using UnityEngine.LowLevel;
-using UnityEngine.PlayerLoop;
-using System.Collections;
 
 #if UNITY_EDITOR
-using UnityEditor.Callbacks;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 #endif

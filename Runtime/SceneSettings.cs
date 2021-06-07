@@ -31,7 +31,7 @@ namespace Popcron.SceneStaging
 
         [HideInInspector]
         public Color ambientLight;
-        
+
         [HideInInspector]
         public Object customReflection;
 
@@ -80,6 +80,15 @@ namespace Popcron.SceneStaging
         [HideInInspector]
         public float fogDensity;
 
+        [HideInInspector]
+        public Lightmap[] lightmaps;
+
+        [HideInInspector]
+        public LightmapsMode lightmapsMode;
+
+        [HideInInspector]
+        public LightProbes lightProbes;
+
         private void FixedUpdate()
         {
             if (!Application.isPlaying)
@@ -105,7 +114,7 @@ namespace Popcron.SceneStaging
             defaultReflectionResolution = RenderSettings.defaultReflectionResolution;
             flareFadeSpeed = RenderSettings.flareFadeSpeed;
             flareStrength = RenderSettings.flareStrength;
-            fog = RenderSettings.fog ;
+            fog = RenderSettings.fog;
             fogColor = RenderSettings.fogColor;
             fogDensity = RenderSettings.fogDensity;
             fogEndDistance = RenderSettings.fogEndDistance;
@@ -116,6 +125,17 @@ namespace Popcron.SceneStaging
             reflectionIntensity = RenderSettings.reflectionIntensity;
             subtractiveShadowColor = RenderSettings.subtractiveShadowColor;
             sun = RenderSettings.sun;
+
+            /*
+            lightmaps = new Lightmap[LightmapSettings.lightmaps.Length];
+            for (int i = 0; i < lightmaps.Length; i++)
+            {
+                lightmaps[i] = new Lightmap(LightmapSettings.lightmaps[i]);
+            }
+
+            lightmapsMode = LightmapSettings.lightmapsMode;
+            lightProbes = LightmapSettings.lightProbes;
+            */
         }
 
         /// <summary>
@@ -150,11 +170,45 @@ namespace Popcron.SceneStaging
             RenderSettings.reflectionIntensity = reflectionIntensity;
             RenderSettings.subtractiveShadowColor = subtractiveShadowColor;
             RenderSettings.sun = sun;
+
+            /*
+            LightmapSettings.lightmaps = new LightmapData[lightmaps.Length];
+            for (int i = 0; i < lightmaps.Length; i++)
+            {
+                lightmaps[i].CopyTo(ref LightmapSettings.lightmaps[i]);
+            }
+
+            LightmapSettings.lightmapsMode = lightmapsMode;
+            LightmapSettings.lightProbes = lightProbes;
+            */
         }
 
         void IOnLoaded.Loaded(List<Variable> variables)
         {
             LoadSettings();
+        }
+
+        [Serializable]
+        public class Lightmap
+        {
+            public Texture2D lightmapColor;
+            public Texture2D lightmapDir;
+            public Texture2D shadowMask;
+
+            public Lightmap(LightmapData data)
+            {
+                lightmapColor = data.lightmapColor;
+                lightmapDir = data.lightmapDir;
+                shadowMask = data.shadowMask;
+            }
+
+            public void CopyTo(ref LightmapData lightmapData)
+            {
+                lightmapData = new LightmapData();
+                lightmapData.lightmapColor = lightmapColor;
+                lightmapData.lightmapDir = lightmapDir;
+                lightmapData.shadowMask = shadowMask;
+            }
         }
     }
 }

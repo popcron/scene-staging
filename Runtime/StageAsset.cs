@@ -17,6 +17,9 @@ namespace Popcron.SceneStaging
             set => stage = value.Clone();
         }
 
+        public string DisplayName => stage.DisplayName;
+        public string ID => stage.ID;
+
         /// <summary>
         /// Creates a new stage asset with this stage object.
         /// </summary>

@@ -115,7 +115,9 @@ namespace Popcron.SceneStaging
                     else if (buildStep == StageBuildStep.FinishedBuilding)
                     {
                         FinishedBuilding();
-                        buildStep = StageBuildStep.Inactive;
+                    }
+                    else if (buildStep == StageBuildStep.Inactive)
+                    {
                         break;
                     }
                 }
@@ -180,6 +182,12 @@ namespace Popcron.SceneStaging
 
         private static void Initializing()
         {
+            if (stage == null)
+            {
+                buildStep = StageBuildStep.Inactive;
+                return;
+            }
+
             //gather the max id
             int maxId = 0;
             int propsCount = stage.Props.Count;
@@ -415,6 +423,7 @@ namespace Popcron.SceneStaging
             }
 
             OnBuiltStage?.Invoke(stage);
+            buildStep = StageBuildStep.Inactive;
         }
 
         /// <summary>
@@ -497,8 +506,8 @@ namespace Popcron.SceneStaging
             public List<PropObject> list = new List<PropObject>();
 
             public PropObject this[int index]
-            { 
-                get => list[index]; 
+            {
+                get => list[index];
                 set => list[index] = value;
             }
 
