@@ -17,7 +17,6 @@ namespace Popcron.SceneStaging
             component.Set(nameof(circleCollider.isTrigger), circleCollider.isTrigger);
             component.Set(nameof(circleCollider.offset), circleCollider.offset);
             component.Set(nameof(circleCollider.sharedMaterial), circleCollider.sharedMaterial);
-            component.Set(nameof(circleCollider.usedByComposite), circleCollider.usedByComposite);
             component.Set(nameof(circleCollider.usedByEffector), circleCollider.usedByEffector);
         }
 
@@ -34,7 +33,6 @@ namespace Popcron.SceneStaging
             circleCollider.isTrigger = component.Get<bool>(nameof(circleCollider.isTrigger));
             circleCollider.offset = component.Get<Vector2>(nameof(circleCollider.offset));
             circleCollider.sharedMaterial = component.Get<PhysicsMaterial2D>(nameof(circleCollider.sharedMaterial));
-            circleCollider.usedByComposite = component.Get<bool>(nameof(circleCollider.usedByComposite));
             circleCollider.usedByEffector = component.Get<bool>(nameof(circleCollider.usedByEffector));
         }
     }
