@@ -495,9 +495,9 @@ namespace Popcron.SceneStaging
                         return result;
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    Debug.LogError($"error converting {raw} into {type}");
+                    Debug.LogError($"error converting {raw} into {type}: {ex}");
                 }
             }
 

@@ -118,6 +118,9 @@ namespace Popcron.SceneStaging
             int instanceId = asset.GetInstanceID();
             if (assetToPath.TryGetValue(instanceId, out string assetPath))
             {
+#if UNITY_EDITOR
+                return StageUtils.GetAssetPath(asset);
+#endif
                 return assetPath;
             }
 

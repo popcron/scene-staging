@@ -23,6 +23,8 @@ namespace Popcron.SceneStaging
         [SerializeField]
         private List<Prop> props = new List<Prop>();
 
+        private Dictionary<int, Prop> idToProp = null;
+
         /// <summary>
         /// Unique ID of this map.
         /// </summary>
@@ -109,11 +111,35 @@ namespace Popcron.SceneStaging
         /// </summary>
         public Prop GetProp(int id)
         {
+            if (idToProp == null)
+            {
+                idToProp = new Dictionary<int, Prop>();
+                int propsCount = props.Count;
+                for (int p = propsCount - 1; p >= 0; p--)
+                {
+                    Prop propHere = props[p];
+                    idToProp[propHere.ID] = propHere;
+                }
+            }
+
+            if (idToProp.TryGetValue(id, out Prop prop))
+            {
+                return prop;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Returns the first prop with this exact name.
+        /// </summary>
+        public Prop GetProp(string name)
+        {
             int propsCount = props.Count;
             for (int p = propsCount - 1; p >= 0; p--)
             {
                 Prop prop = props[p];
-                if (prop.ID == id)
+                if (prop.Name == name)
                 {
                     return prop;
                 }
@@ -155,6 +181,13 @@ namespace Popcron.SceneStaging
         public void AddProp(Prop prop)
         {
             props.Add(prop);
+
+            if (idToProp == null)
+            {
+                idToProp = new Dictionary<int, Prop>();
+            }
+
+            idToProp[prop.ID] = prop;
 
             //todo: event here
             //new AddedPropToStage(this, prop).Dispatch();
