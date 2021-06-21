@@ -81,14 +81,12 @@ namespace Popcron.SceneStaging
                 }
 
                 Object unityComponent = gameObject.GetComponent(component.Type);
-                if (unityComponent)
+                if (!unityComponent)
                 {
-                    return unityComponent;
+                    unityComponent = gameObject.AddComponent(component.Type);
                 }
-                else
-                {
-                    return gameObject.AddComponent(component.Type);
-                }
+
+                return unityComponent;
             }
             else
             {
@@ -98,11 +96,11 @@ namespace Popcron.SceneStaging
 
 #if UNITY_EDITOR
         [DidReloadScripts]
-#endif
         private static void Initialize()
         {
             int allCount = All.Count;
         }
+#endif
 
         /// <summary>
         /// Returns a processor that is meant to process this kind of component.

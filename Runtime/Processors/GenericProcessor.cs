@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using Object = UnityEngine.Object;
+using UnityComponent = UnityEngine.Component;
 
 namespace Popcron.SceneStaging
 {
@@ -13,20 +14,33 @@ namespace Popcron.SceneStaging
 
         protected override bool IsMatch(Type type)
         {
-            return typeof(MonoBehaviour).IsAssignableFrom(type);
+            return typeof(UnityComponent).IsAssignableFrom(type);
         }
 
-        public override void SaveComponent(Component component, Object unityComponent)
+        public override void SaveComponent(Component component, Object unityObject)
         {
-            if (unityComponent is MonoBehaviour monoBehaviour)
+            if (unityObject is UnityComponent unityComponent)
             {
-                FieldInfo[] fields = StageUtils.GetFields(monoBehaviour.GetType());
-                int fieldsLength = fields.Length;
-                for (int i = 0; i < fieldsLength; i++)
+                MemberInfo[] members = StageUtils.GetMembers(unityComponent.GetType());
+                int membersLength = members.Length;
+                for (int i = 0; i < membersLength; i++)
                 {
-                    FieldInfo field = fields[i];
-                    Type fieldType = field.FieldType;
-                    object value = field.GetValue(monoBehaviour);
+                    MemberInfo member = members[i];
+                    FieldInfo field = member as FieldInfo;
+                    PropertyInfo property = member as PropertyInfo;
+                    Type fieldType = null;
+                    object value = null;
+                    if (field != null)
+                    {
+                        fieldType = field.FieldType;
+                        value = field.GetValue(unityComponent);
+                    }
+                    else if (property != null)
+                    {
+                        fieldType = property.PropertyType;
+                        value = property.GetValue(unityComponent);
+                    }
+
                     string pathToPrefab = null;
                     if (value is Object valueObject)
                     {
@@ -41,7 +55,7 @@ namespace Popcron.SceneStaging
                         stringBuilder.Append(pathToPrefab);
                         stringBuilder.Append(':');
                         stringBuilder.Append(fullTypeName);
-                        component.Set(field.Name, stringBuilder.ToString());
+                        component.Set(member.Name, stringBuilder.ToString());
                     }
                     else
                     {
@@ -50,11 +64,11 @@ namespace Popcron.SceneStaging
                             if (value is Transform transform && transform)
                             {
                                 int? id = Stage.GetProp(transform)?.ID;
-                                component.Set(field.Name, id?.ToString() ?? "");
+                                component.Set(member.Name, id?.ToString() ?? "");
                             }
                             else
                             {
-                                component.Set(field.Name, "");
+                                component.Set(member.Name, "");
                             }
                         }
                         else if (typeof(Behaviour).IsAssignableFrom(fieldType))
@@ -71,28 +85,28 @@ namespace Popcron.SceneStaging
                                     stringBuilder.Append(id);
                                     stringBuilder.Append(':');
                                     stringBuilder.Append(componentIndex);
-                                    component.Set(field.Name, stringBuilder.ToString());
+                                    component.Set(member.Name, stringBuilder.ToString());
                                 }
                                 else
                                 {
-                                    component.Set(field.Name, "");
+                                    component.Set(member.Name, "");
                                 }
                             }
                             else
                             {
-                                component.Set(field.Name, "");
+                                component.Set(member.Name, "");
                             }
                         }
                         else
                         {
-                            component.Set(field.Name, value);
+                            component.Set(member.Name, value);
                         }
                     }
                 }
             }
         }
 
-        private async void AssignEventually(FieldInfo field, MonoBehaviour mb, GameObject gameObject, int index, int timeout = 500)
+        private async void AssignEventually(FieldInfo field, PropertyInfo property, UnityComponent unityComponent, GameObject gameObject, int index, int timeout = 500)
         {
             int frame = 0;
             while (frame < timeout)
@@ -100,7 +114,7 @@ namespace Popcron.SceneStaging
                 Behaviour[] behaviours = gameObject.GetComponents<Behaviour>();
                 if (behaviours.Length > 0 && index < behaviours.Length)
                 {
-                    field.SetValue(mb, behaviours[index]);
+                    SetValue(field, property, unityComponent, behaviours[index]);
                     return;
                 }
 
@@ -109,25 +123,37 @@ namespace Popcron.SceneStaging
             }
         }
 
-        public override void LoadComponent(Component component, Object unityComponent)
+        public override void LoadComponent(Component component, Object unityObject)
         {
-            if (unityComponent is MonoBehaviour mb)
+            if (unityObject is UnityComponent unityComponent)
             {
-                FieldInfo[] fields = StageUtils.GetFields(mb.GetType());
-                int fieldsLength = fields.Length;
-                for (int i = fieldsLength - 1; i >= 0; i--)
+                MemberInfo[] members = StageUtils.GetMembers(unityComponent.GetType());
+                int membersLength = members.Length;
+                for (int i = membersLength - 1; i >= 0; i--)
                 {
-                    FieldInfo field = fields[i];
-                    Type fieldType = field.FieldType;
+                    MemberInfo member = members[i];
+                    string name = member.Name;
+                    FieldInfo field = member as FieldInfo;
+                    PropertyInfo property = member as PropertyInfo;
+                    Type fieldType = null;
+                    if (field != null)
+                    {
+                        fieldType = field.FieldType;
+                    }
+                    else if (property != null)
+                    {
+                        fieldType = property.PropertyType;
+                    }
+
                     if (typeof(Object).IsAssignableFrom(fieldType))
                     {
-                        if (component.Contains(field.Name))
+                        if (component.Contains(name))
                         {
-                            string value = component.GetRaw(field.Name);
+                            string value = component.GetRaw(name);
                             if (int.TryParse(value, out int transformId))
                             {
                                 Prop prop = Stage.GetProp(transformId);
-                                field.SetValue(mb, prop.Transform);
+                                SetValue(field, property, unityComponent, prop.Transform);
                             }
                             else
                             {
@@ -142,12 +168,12 @@ namespace Popcron.SceneStaging
                                         if (type != null)
                                         {
                                             Object prefab = ReferencesDatabase.Get(type, pathToPrefab);
-                                            field.SetValue(mb, prefab);
+                                            SetValue(field, property, unityComponent, prefab);
                                         }
                                         else
                                         {
-                                            Debug.LogError($"couldnt find type with name {fullTypeName} when assigning a value to field {field.Name}");
-                                            field.SetValue(mb, null);
+                                            Debug.LogError($"couldnt find type with name {fullTypeName} when assigning a value to field {name}");
+                                            SetValue(field, property, unityComponent, null);
                                         }
                                     }
                                     else
@@ -155,25 +181,37 @@ namespace Popcron.SceneStaging
                                         int id = Conversion.ConvertFromJson<int>(splits[0]);
                                         int index = Conversion.ConvertFromJson<int>(splits[1]);
                                         Prop prop = Stage.GetProp(id);
-                                        AssignEventually(field, mb, prop.GameObject, index);
+                                        AssignEventually(field, property, unityComponent, prop.GameObject, index);
                                     }
                                 }
                                 else
                                 {
-                                    field.SetValue(mb, null);
+                                    SetValue(field, property, unityComponent, null);
                                 }
                             }
                         }
                     }
                     else
                     {
-                        if (component.Contains(field.Name))
+                        if (component.Contains(name))
                         {
-                            object value = component.Get(field.Name, fieldType);
-                            field.SetValue(mb, value);
+                            object value = component.Get(name, fieldType);
+                            SetValue(field, property, unityComponent, value);
                         }
                     }
                 }
+            }
+        }
+
+        private void SetValue(FieldInfo field, PropertyInfo property, object obj, object value)
+        {
+            if (field != null)
+            {
+                field.SetValue(obj, value);
+            }
+            else if (property != null)
+            {
+                property.SetValue(obj, value);
             }
         }
     }
