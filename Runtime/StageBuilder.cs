@@ -357,15 +357,27 @@ namespace Popcron.SceneStaging
                             processor.LoadComponent(component, unityComponent);
 
                             //assign transforms references
-                            FieldInfo[] fields = StageUtils.GetFields(unityComponent.GetType());
-                            int fieldsCount = fields.Length;
-                            for (int f = fieldsCount - 1; f >= 0; f--)
+                            MemberInfo[] members = StageUtils.GetMembers(unityComponent.GetType());
+                            int membersLength = members.Length;
+                            for (int f = membersLength - 1; f >= 0; f--)
                             {
-                                FieldInfo field = fields[f];
-                                if (field.FieldType == typeof(Transform))
+                                MemberInfo member = members[f];
+                                Type memberType = null;
+                                FieldInfo field = member as FieldInfo;
+                                PropertyInfo property = member as PropertyInfo;
+                                if (field != null)
+                                {
+                                    memberType = field.FieldType;
+                                }
+                                else if (property != null)
+                                {
+                                    memberType = property.PropertyType;
+                                }
+
+                                if (memberType == typeof(Transform))
                                 {
                                     //attempt to set the transform value for this field
-                                    string transformValue = component.GetRaw(field.Name);
+                                    string transformValue = component.GetRaw(member.Name);
                                     if (!string.IsNullOrEmpty(transformValue) && int.TryParse(transformValue, out int transformId))
                                     {
                                         GameObject transformObject = null;
@@ -376,7 +388,14 @@ namespace Popcron.SceneStaging
 
                                         if (transformObject)
                                         {
-                                            field.SetValue(unityComponent, transformObject.transform);
+                                            if (field != null)
+                                            {
+                                                field.SetValue(unityComponent, transformObject.transform);
+                                            }
+                                            else if (property != null)
+                                            {
+                                                property.SetValue(unityComponent, transformObject.transform);
+                                            }
                                         }
                                     }
                                 }

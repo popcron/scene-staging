@@ -6,6 +6,7 @@ using UnityEngine;
 using Random = System.Random;
 using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
+using UnityComponent = UnityEngine.Component;
 
 #if UNITY_EDITOR
 using UnityEditor.Callbacks;
@@ -19,7 +20,7 @@ namespace Popcron.SceneStaging
         private static Object[] resources;
         private static Random random;
         private static Dictionary<string, Type> fullTypeNameToType;
-        private static Dictionary<Type, FieldInfo[]> typeToFieldInfos;
+        private static Dictionary<Type, MemberInfo[]> typeToMembers;
         private static Dictionary<Type, TypeType> typeToTypeType;
         private static Type[] all;
 
@@ -33,7 +34,7 @@ namespace Popcron.SceneStaging
             {
                 random = new Random();
                 fullTypeNameToType = new Dictionary<string, Type>();
-                typeToFieldInfos = new Dictionary<Type, FieldInfo[]>();
+                typeToMembers = new Dictionary<Type, MemberInfo[]>();
                 typeToTypeType = new Dictionary<Type, TypeType>();
                 List<Type> list = new List<Type>();
                 Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
@@ -43,7 +44,7 @@ namespace Popcron.SceneStaging
                     foreach (Type type in types)
                     {
                         fullTypeNameToType[type.FullName] = type;
-                        typeToFieldInfos[type] = FindFields(type).ToArray();
+                        typeToMembers[type] = FindMembers(type).ToArray();
 
                         if (type.IsEnum)
                         {
@@ -70,47 +71,90 @@ namespace Popcron.SceneStaging
             }
         }
 
-        private static List<FieldInfo> FindFields(Type type)
+        /// <summary>
+        /// Shoulds this specific member declared inside this type be ignored?
+        /// </summary>
+        private static bool ShouldIgnore(Type type, MemberInfo member)
         {
-            List<FieldInfo> fields = new List<FieldInfo>();
+            if (member.MemberType == MemberTypes.Property)
+            {
+                if (member.Name == "name" || member.Name == "tag")
+                {
+                    Type memberType = ((PropertyInfo)member).PropertyType;
+                    if (memberType == typeof(string) && typeof(UnityComponent).IsAssignableFrom(type))
+                    {
+                        //ignore the name and tag properties on unity components
+                        return true;
+                    }
+                }
+                else if (member.Name == "material" || member.Name == "materials")
+                {
+                    if (typeof(Renderer).IsAssignableFrom(type))
+                    {
+                        //ignore these memory leakers
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private static List<MemberInfo> FindMembers(Type type)
+        {
+            List<MemberInfo> members = new List<MemberInfo>();
             while (!type.Equals(typeof(MonoBehaviour)) && !(type is null))
             {
-                FieldInfo[] allFields = type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-                for (int i = 0; i < allFields.Length; i++)
+                MemberInfo[] allMembers = type.GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                int membersCount = allMembers.Length;
+                for (int i = 0; i < membersCount; i++)
                 {
-                    FieldInfo field = allFields[i];
+                    MemberInfo member = allMembers[i];
 
                     //skip duplicates
-                    if (fields.Contains(field))
-                    {
-                        continue;
-                    }
-
-                    //skip static fields
-                    if (field.IsStatic)
+                    if (members.Contains(member))
                     {
                         continue;
                     }
 
                     //ignore if it has a not stage saved attribute
-                    bool notStageSaved = field.GetCustomAttribute<NotStageSerializedAttribute>() != null;
+                    bool notStageSaved = member.GetCustomAttribute<NotStageSerializedAttribute>() != null;
                     if (notStageSaved)
                     {
                         continue;
                     }
 
-                    if (field.IsPublic)
+                    if (ShouldIgnore(type, member))
                     {
-                        //if its public, then add it
-                        fields.Add(field);
+                        continue;
                     }
-                    else if (!field.IsPublic)
+
+                    if (member is FieldInfo field)
                     {
-                        //if its private but has serialized attributes, then add it
-                        bool serializeField = field.GetCustomAttribute<SerializeField>() != null;
-                        if (serializeField)
+                        if (field.IsPublic)
                         {
-                            fields.Add(field);
+                            //if its public, then add it
+                            members.Add(field);
+                        }
+                        else
+                        {
+                            //if its private but has a serialize attribute, then add it
+                            bool serializeField = field.GetCustomAttribute<SerializeField>() != null;
+                            if (serializeField)
+                            {
+                                members.Add(field);
+                            }
+                        }
+                    }
+                    else if (member is PropertyInfo property)
+                    {
+                        if (property.GetMethod != null && property.SetMethod != null)
+                        {
+                            if (property.GetMethod.IsPublic && property.SetMethod.IsPublic)
+                            {
+                                //only add properties that have public getter and setters
+                                members.Add(property);
+                            }
                         }
                     }
                 }
@@ -123,22 +167,22 @@ namespace Popcron.SceneStaging
                 type = type.BaseType;
             }
 
-            return fields;
+            return members;
         }
 
         /// <summary>
-        /// Returns all fields for this type.
+        /// Returns all fields and properties for this type.
         /// </summary>
-        public static FieldInfo[] GetFields(Type type)
+        public static MemberInfo[] GetMembers(Type type)
         {
-            if (typeToFieldInfos is null)
+            if (typeToMembers is null)
             {
                 Initialize();
             }
 
-            if (type != null && typeToFieldInfos.TryGetValue(type, out FieldInfo[] fields))
+            if (type != null && typeToMembers.TryGetValue(type, out MemberInfo[] members))
             {
-                return fields;
+                return members;
             }
             else
             {
