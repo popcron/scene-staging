@@ -216,6 +216,9 @@ namespace Popcron.SceneStaging
         /// </summary>
         public void AddComponent(Component component) => components.Add(component);
 
+        /// <summary>
+        /// Returns a component of this type or adds one if on already exists.
+        /// </summary>
         public Component GetOrAddComponent(string fullTypeName)
         {
             int componentCount = components.Count;
