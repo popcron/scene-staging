@@ -185,18 +185,38 @@ namespace Popcron.SceneStaging
                         }
                         else if (value is Bounds bounds)
                         {
+                            Vector3 min = bounds.min;
+                            Vector3 max = bounds.max;
                             stringBuilder.Clear();
-                            stringBuilder.Append(ToJsonToken(bounds.min));
+                            stringBuilder.Append(min.x);
                             stringBuilder.Append(',');
-                            stringBuilder.Append(ToJsonToken(bounds.max));
+                            stringBuilder.Append(min.y);
+                            stringBuilder.Append(',');
+                            stringBuilder.Append(min.z);
+                            stringBuilder.Append(',');
+                            stringBuilder.Append(max.x);
+                            stringBuilder.Append(',');
+                            stringBuilder.Append(max.y);
+                            stringBuilder.Append(',');
+                            stringBuilder.Append(max.z);
                             return stringBuilder.ToString();
                         }
                         else if (value is BoundsInt boundsInt)
                         {
+                            Vector3Int min = boundsInt.min;
+                            Vector3Int max = boundsInt.max;
                             stringBuilder.Clear();
-                            stringBuilder.Append(ToJsonToken(boundsInt.min));
+                            stringBuilder.Append(min.x);
                             stringBuilder.Append(',');
-                            stringBuilder.Append(ToJsonToken(boundsInt.max));
+                            stringBuilder.Append(min.y);
+                            stringBuilder.Append(',');
+                            stringBuilder.Append(min.z);
+                            stringBuilder.Append(',');
+                            stringBuilder.Append(max.x);
+                            stringBuilder.Append(',');
+                            stringBuilder.Append(max.y);
+                            stringBuilder.Append(',');
+                            stringBuilder.Append(max.z);
                             return stringBuilder.ToString();
                         }
                         else if (value is Color color)
@@ -314,148 +334,148 @@ namespace Popcron.SceneStaging
                 return null;
             }
 
-            TypeType typeType = StageUtils.GetTypeType(type);
-            if (typeType == TypeType.Enum)
+            try
             {
-                if (int.TryParse(raw, out int index))
+                TypeType typeType = StageUtils.GetTypeType(type);
+                if (typeType == TypeType.Enum)
                 {
-                    Array options = Enum.GetValues(type);
-                    if (index > 0 && options.Length > index)
+                    if (int.TryParse(raw, out int index))
                     {
-                        return options.GetValue(index);
+                        Array options = Enum.GetValues(type);
+                        if (index > 0 && options.Length > index)
+                        {
+                            return options.GetValue(index);
+                        }
                     }
-                }
 
-                try
-                {
-                    object enumValue = Enum.Parse(type, raw, true);
-                    if (enumValue != null)
+                    try
                     {
-                        return enumValue;
+                        object enumValue = Enum.Parse(type, raw, true);
+                        if (enumValue != null)
+                        {
+                            return enumValue;
+                        }
                     }
+                    catch { }
                 }
-                catch { }
-            }
-            else
-            {
-                if (typeof(Object).IsAssignableFrom(type))
+                else
                 {
-                    return ReferencesDatabase.Get(type, raw);
-                }
-                else if (type == typeof(byte))
-                {
-                    return (byte)ToULong(ref raw);
-                }
-                else if (type == typeof(sbyte))
-                {
-                    return (sbyte)ToLong(ref raw);
-                }
-                else if (type == typeof(short))
-                {
-                    return (short)ToLong(ref raw);
-                }
-                else if (type == typeof(ushort))
-                {
-                    return ushort.Parse(raw);
-                }
-                else if (type == typeof(int))
-                {
-                    return (int)ToLong(ref raw);
-                }
-                else if (type == typeof(uint))
-                {
-                    return (uint)ToULong(ref raw);
-                }
-                else if (type == typeof(long))
-                {
-                    return ToLong(ref raw);
-                }
-                else if (type == typeof(ulong))
-                {
-                    return ToULong(ref raw);
-                }
-                else if (type == typeof(float))
-                {
-                    return float.Parse(raw);
-                }
-                else if (type == typeof(double))
-                {
-                    return double.Parse(raw);
-                }
-                else if (type == typeof(decimal))
-                {
-                    return decimal.Parse(raw);
-                }
-                else if (type == typeof(bool))
-                {
-                    return bool.Parse(raw);
-                }
-                else if (type == typeof(string))
-                {
-                    return raw;
-                }
-                else if (type == typeof(Vector2))
-                {
-                    float[] floats = ExtractParts<float>(raw);
-                    return new Vector2(floats[0], floats[1]);
-                }
-                else if (type == typeof(Vector3))
-                {
-                    float[] floats = ExtractParts<float>(raw);
-                    return new Vector3(floats[0], floats[1], floats[2]);
-                }
-                else if (type == typeof(Vector4))
-                {
-                    float[] floats = ExtractParts<float>(raw);
-                    return new Vector4(floats[0], floats[1], floats[2], floats[3]);
-                }
-                else if (type == typeof(Vector2Int))
-                {
-                    int[] ints = ExtractParts<int>(raw);
-                    return new Vector2Int(ints[0], ints[1]);
-                }
-                else if (type == typeof(Vector3Int))
-                {
-                    int[] ints = ExtractParts<int>(raw);
-                    return new Vector3Int(ints[0], ints[1], ints[2]);
-                }
-                else if (type == typeof(Quaternion))
-                {
-                    float[] floats = ExtractParts<float>(raw);
-                    return new Quaternion(floats[0], floats[1], floats[2], floats[3]);
-                }
-                else if (type == typeof(Bounds))
-                {
-                    float[] floats = ExtractParts<float>(raw);
-                    Vector3 min = new Vector3(floats[0], floats[1], floats[2]);
-                    Vector3 max = new Vector3(floats[3], floats[4], floats[5]);
-                    return new Bounds((max + min) * 0.5f, max - min);
-                }
-                else if (type == typeof(BoundsInt))
-                {
-                    int[] ints = ExtractParts<int>(raw);
-                    Vector3Int min = new Vector3Int(ints[0], ints[1], ints[2]);
-                    Vector3Int max = new Vector3Int(ints[3], ints[4], ints[5]);
-                    Vector3Int size = max - min;
-                    return new BoundsInt(min.x, min.y, min.z, size.x, size.y, size.z);
-                }
-                else if (type == typeof(Color))
-                {
-                    float[] floats = ExtractParts<float>(raw);
-                    return new Color(floats[0], floats[1], floats[2], floats[3]);
-                }
-                else if (type == typeof(Color32))
-                {
-                    byte[] bytes = ExtractParts<byte>(raw);
-                    return new Color32(bytes[0], bytes[1], bytes[2], bytes[3]);
-                }
-                else if (type == typeof(LayerMask))
-                {
-                    return (LayerMask)(int)ToLong(ref raw);
-                }
+                    if (typeof(Object).IsAssignableFrom(type))
+                    {
+                        return ReferencesDatabase.Get(type, raw);
+                    }
+                    else if (type == typeof(byte))
+                    {
+                        return (byte)ToULong(ref raw);
+                    }
+                    else if (type == typeof(sbyte))
+                    {
+                        return (sbyte)ToLong(ref raw);
+                    }
+                    else if (type == typeof(short))
+                    {
+                        return (short)ToLong(ref raw);
+                    }
+                    else if (type == typeof(ushort))
+                    {
+                        return ushort.Parse(raw);
+                    }
+                    else if (type == typeof(int))
+                    {
+                        return (int)ToLong(ref raw);
+                    }
+                    else if (type == typeof(uint))
+                    {
+                        return (uint)ToULong(ref raw);
+                    }
+                    else if (type == typeof(long))
+                    {
+                        return ToLong(ref raw);
+                    }
+                    else if (type == typeof(ulong))
+                    {
+                        return ToULong(ref raw);
+                    }
+                    else if (type == typeof(float))
+                    {
+                        return float.Parse(raw);
+                    }
+                    else if (type == typeof(double))
+                    {
+                        return double.Parse(raw);
+                    }
+                    else if (type == typeof(decimal))
+                    {
+                        return decimal.Parse(raw);
+                    }
+                    else if (type == typeof(bool))
+                    {
+                        return bool.Parse(raw);
+                    }
+                    else if (type == typeof(string))
+                    {
+                        return raw;
+                    }
+                    else if (type == typeof(Vector2))
+                    {
+                        float[] floats = ExtractParts<float>(raw);
+                        return new Vector2(floats[0], floats[1]);
+                    }
+                    else if (type == typeof(Vector3))
+                    {
+                        float[] floats = ExtractParts<float>(raw);
+                        return new Vector3(floats[0], floats[1], floats[2]);
+                    }
+                    else if (type == typeof(Vector4))
+                    {
+                        float[] floats = ExtractParts<float>(raw);
+                        return new Vector4(floats[0], floats[1], floats[2], floats[3]);
+                    }
+                    else if (type == typeof(Vector2Int))
+                    {
+                        int[] ints = ExtractParts<int>(raw);
+                        return new Vector2Int(ints[0], ints[1]);
+                    }
+                    else if (type == typeof(Vector3Int))
+                    {
+                        int[] ints = ExtractParts<int>(raw);
+                        return new Vector3Int(ints[0], ints[1], ints[2]);
+                    }
+                    else if (type == typeof(Quaternion))
+                    {
+                        float[] floats = ExtractParts<float>(raw);
+                        return new Quaternion(floats[0], floats[1], floats[2], floats[3]);
+                    }
+                    else if (type == typeof(Bounds))
+                    {
+                        float[] floats = ExtractParts<float>(raw);
+                        Vector3 min = new Vector3(floats[0], floats[1], floats[2]);
+                        Vector3 max = new Vector3(floats[3], floats[4], floats[5]);
+                        return new Bounds((max + min) * 0.5f, max - min);
+                    }
+                    else if (type == typeof(BoundsInt))
+                    {
+                        int[] ints = ExtractParts<int>(raw);
+                        Vector3Int min = new Vector3Int(ints[0], ints[1], ints[2]);
+                        Vector3Int max = new Vector3Int(ints[3], ints[4], ints[5]);
+                        Vector3Int size = max - min;
+                        return new BoundsInt(min.x, min.y, min.z, size.x, size.y, size.z);
+                    }
+                    else if (type == typeof(Color))
+                    {
+                        float[] floats = ExtractParts<float>(raw);
+                        return new Color(floats[0], floats[1], floats[2], floats[3]);
+                    }
+                    else if (type == typeof(Color32))
+                    {
+                        byte[] bytes = ExtractParts<byte>(raw);
+                        return new Color32(bytes[0], bytes[1], bytes[2], bytes[3]);
+                    }
+                    else if (type == typeof(LayerMask))
+                    {
+                        return (LayerMask)(int)ToLong(ref raw);
+                    }
 
-                try
-                {
                     object jsonToken = JsonConvert.DeserializeObject(raw, settings);
                     if (jsonToken is JArray jsonArray)
                     {
@@ -495,10 +515,10 @@ namespace Popcron.SceneStaging
                         return result;
                     }
                 }
-                catch (Exception ex)
-                {
-                    Debug.LogError($"error converting {raw} into {type}: {ex}");
-                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Error converting {raw} into {type}: {ex}");
             }
 
             return null;
