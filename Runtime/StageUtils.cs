@@ -5,7 +5,7 @@ using System.Reflection;
 using UnityEngine;
 using Random = System.Random;
 using UnityEngine.SceneManagement;
-using Object = UnityEngine.Object;
+using UnityObject = UnityEngine.Object;
 using UnityComponent = UnityEngine.Component;
 
 #if UNITY_EDITOR
@@ -17,7 +17,7 @@ namespace Popcron.SceneStaging
 {
     public class StageUtils
     {
-        private static Object[] resources;
+        private static UnityObject[] resources;
         private static Random random;
         private static Dictionary<string, Type> fullTypeNameToType;
         private static Dictionary<Type, MemberInfo[]> typeToMembers;
@@ -99,12 +99,27 @@ namespace Popcron.SceneStaging
 
             if (member.MemberType == MemberTypes.Property)
             {
-                if (member.Name == "name" || member.Name == "tag")
+                if (member.Name == "name")
                 {
-                    Type memberType = ((PropertyInfo)member).PropertyType;
-                    if (memberType == typeof(string) && typeof(UnityComponent).IsAssignableFrom(type))
+                    if (typeof(UnityObject).IsAssignableFrom(type))
                     {
-                        //ignore the name and tag properties on unity components
+                        //redundant information
+                        return true;
+                    }
+                }
+                else if (member.Name == "isActiveAndEnabled")
+                {
+                    if (typeof(Behaviour).IsAssignableFrom(type))
+                    {
+                        //pointless
+                        return true;
+                    }
+                }
+                else if (member.Name == "tag" || member.Name == "gameObject" || member.Name == "transform")
+                {
+                    if (typeof(UnityComponent).IsAssignableFrom(type))
+                    {
+                        //redundant information
                         return true;
                     }
                 }
@@ -266,26 +281,26 @@ namespace Popcron.SceneStaging
         /// Returns the real path of the asset.
         /// Editor only.
         /// </summary>
-        public static string GetAssetPath(Object asset)
+        public static string GetAssetPath(UnityObject asset)
         {
             if (resources is null)
             {
-                resources = Resources.FindObjectsOfTypeAll(typeof(Object));
+                resources = Resources.FindObjectsOfTypeAll(typeof(UnityObject));
             }
 
             int resourcesLength = resources.Length;
             for (int i = resourcesLength - 1; i >= 0; i--)
             {
-                ref Object resourceAsset = ref resources[i];
+                ref UnityObject resourceAsset = ref resources[i];
                 if (resourceAsset == asset)
                 {
                     string path = AssetDatabase.GetAssetPath(resourceAsset);
                     if (!string.IsNullOrEmpty(path))
                     {
-                        Object[] subAssets = AssetDatabase.LoadAllAssetsAtPath(path);
+                        UnityObject[] subAssets = AssetDatabase.LoadAllAssetsAtPath(path);
                         for (int a = 0; a < subAssets.Length; a++)
                         {
-                            ref Object subAsset = ref subAssets[a];
+                            ref UnityObject subAsset = ref subAssets[a];
                             if (subAsset == asset)
                             {
                                 return $"{path}/{asset.name}";
