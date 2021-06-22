@@ -4,16 +4,12 @@ using System.Collections.ObjectModel;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-#if UNITY_EDITOR
-using UnityEditor.Callbacks;
-#endif
-
 namespace Popcron.SceneStaging
 {
     public abstract class ComponentProcessor
     {
         private static List<ComponentProcessor> matchingProcessors = new List<ComponentProcessor>();
-        private static Dictionary<Type, ComponentProcessor> typeToProcessor = new Dictionary<Type, ComponentProcessor>();
+        private static Dictionary<string, ComponentProcessor> typeToProcessor = new Dictionary<string, ComponentProcessor>();
         private static ReadOnlyCollection<ComponentProcessor> all;
 
         /// <summary>
@@ -25,16 +21,7 @@ namespace Popcron.SceneStaging
             {
                 if (all is null)
                 {
-                    List<ComponentProcessor> allList = new List<ComponentProcessor>();
-                    foreach (Type type in StageUtils.GetAllAssignableFrom<ComponentProcessor>())
-                    {
-                        if (!type.IsAbstract)
-                        {
-                            allList.Add(Activator.CreateInstance(type) as ComponentProcessor);
-                        }
-                    }
-
-                    all = allList.AsReadOnly();
+                    FindAllProcessors();
                 }
 
                 return all;
@@ -46,6 +33,9 @@ namespace Popcron.SceneStaging
         /// </summary>
         public Stage Stage { get; set; }
 
+        /// <summary>
+        /// Returns true if this component processor is meant to parse for this type.
+        /// </summary>
         protected abstract bool IsMatch(Type type);
 
         /// <summary>
@@ -75,7 +65,7 @@ namespace Popcron.SceneStaging
         {
             if (component.Type != null)
             {
-                if (component.Type.Equals(typeof(GameObject)))
+                if (component.FullTypeName.Equals("UnityEngine.GameObject"))
                 {
                     return gameObject;
                 }
@@ -94,14 +84,6 @@ namespace Popcron.SceneStaging
             }
         }
 
-#if UNITY_EDITOR
-        [DidReloadScripts]
-        private static void Initialize()
-        {
-            int allCount = All.Count;
-        }
-#endif
-
         /// <summary>
         /// Returns a processor that is meant to process this kind of component.
         /// </summary>
@@ -117,7 +99,28 @@ namespace Popcron.SceneStaging
                 return null;
             }
 
-            if (typeToProcessor.TryGetValue(type, out ComponentProcessor typeProcessor))
+            string typeFullName = type.FullName;
+            return Get(typeFullName);
+        }
+
+        /// <summary>
+        /// Returns a processor that is meant to process this kind of component.
+        /// </summary>
+        public static ComponentProcessor Get(string typeFullName)
+        {
+            if (string.IsNullOrEmpty(typeFullName))
+            {
+                return null;
+            }
+
+            Type type = StageUtils.GetType(typeFullName);
+            if (type is null)
+            {
+                Debug.LogError($"No type found for {typeFullName}");
+                return null;
+            }
+
+            if (typeToProcessor.TryGetValue(typeFullName, out ComponentProcessor typeProcessor))
             {
                 return typeProcessor;
             }
@@ -154,8 +157,56 @@ namespace Popcron.SceneStaging
                     }
                 }
 
-                typeToProcessor[type] = typeProcessor;
+                typeToProcessor[typeFullName] = typeProcessor;
                 return typeProcessor;
+            }
+        }
+
+        private static void FindAllProcessors()
+        {
+            if (Debug.isDebugBuild)
+            {
+                Debug.Log("Looking for all component processors");
+            }
+
+            List<ComponentProcessor> processors = new List<ComponentProcessor>();
+            List<Type> processorTypes = new List<Type>();
+            foreach (Type type in StageUtils.GetAllAssignableFrom<ComponentProcessor>())
+            {
+                if (!type.IsAbstract)
+                {
+                    ComponentProcessor processor = Activator.CreateInstance(type) as ComponentProcessor;
+                    if (processor != null)
+                    {
+                        processors.Add(processor);
+                        processorTypes.Add(type);
+                    }
+                }
+            }
+
+            //ensure the builtin processors are included
+            if (!processorTypes.Contains(typeof(GenericProcessor)))
+            {
+                processors.Add(new GenericProcessor());
+            }
+
+            if (!processorTypes.Contains(typeof(GameObjectProcessor)))
+            {
+                processors.Add(new GameObjectProcessor());
+            }
+
+            if (!processorTypes.Contains(typeof(TransformProcessor)))
+            {
+                processors.Add(new TransformProcessor());
+            }
+
+            all = processors.AsReadOnly();
+            foreach (ComponentProcessor processor in all)
+            {
+                if (Debug.isDebugBuild)
+                {
+                    Debug.Log($"Loaded component processor {processor.GetType().Name}");
+                }
             }
         }
     }

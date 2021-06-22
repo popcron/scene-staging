@@ -3,6 +3,7 @@ using Object = UnityEngine.Object;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Collections.ObjectModel;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -15,6 +16,8 @@ namespace Popcron.SceneStaging
     {
         private static ReferencesDatabase current;
         private static Dictionary<int, string> assetToPath;
+        private static ReadOnlyCollection<Reference> referencesReadOnly;
+        private static Dictionary<(Type, string), Object> referenceCache;
 
         /// <summary>
         /// The current settings data being used.
@@ -35,6 +38,23 @@ namespace Popcron.SceneStaging
         [SerializeField]
         private List<Reference> references = new List<Reference>();
 
+        public static ReadOnlyCollection<Reference> All
+        {
+            get
+            {
+                if (referencesReadOnly is null)
+                {
+                    referencesReadOnly = Current.references.AsReadOnly();
+                }
+                else if (referencesReadOnly.Count != Current.references.Count)
+                {
+                    referencesReadOnly = Current.references.AsReadOnly();
+                }
+
+                return referencesReadOnly;
+            }
+        }
+
         private void OnEnable()
         {
             Sanitize();
@@ -52,7 +72,8 @@ namespace Popcron.SceneStaging
         {
             //remove duplicates and empties
             bool changesMade = false;
-            for (int i = references.Count - 1; i >= 0; i--)
+            int referencesCount = references.Count;
+            for (int i = referencesCount - 1; i >= 0; i--)
             {
                 Reference reference = references[i];
                 if (!reference.Asset)
@@ -120,8 +141,9 @@ namespace Popcron.SceneStaging
             {
 #if UNITY_EDITOR
                 return StageUtils.GetAssetPath(asset);
-#endif
+#else
                 return assetPath;
+#endif
             }
 
 #if UNITY_EDITOR
@@ -130,6 +152,7 @@ namespace Popcron.SceneStaging
             {
                 Reference newReference = new Reference(realPath, asset);
                 current.references.Add(newReference);
+                referencesReadOnly = null;
                 EditorUtility.SetDirty(current);
                 assetToPath[asset.GetInstanceID()] = realPath;
                 return realPath;
@@ -194,17 +217,34 @@ namespace Popcron.SceneStaging
         /// </summary>
         public static Object Get(Type type, string path)
         {
-            ReferencesDatabase current = Current;
-            for (int i = 0; i < current.references.Count; i++)
+            if (referenceCache is null)
             {
-                Reference reference = current.references[i];
-                if (reference.Path == path && reference.Asset.GetType() == type)
-                {
-                    return reference.Asset;
-                }
+                CreateCache();
+            }
+
+            if (referenceCache.TryGetValue((type, path), out Object asset))
+            {
+                return asset;
             }
 
             return null;
+        }
+
+        private static void CreateCache()
+        {
+            referenceCache = new Dictionary<(Type, string), Object>();
+            ReferencesDatabase current = Current;
+            int referencesCount = current.references.Count;
+            for (int i = 0; i < referencesCount; i++)
+            {
+                Reference reference = current.references[i];
+                Object asset = reference.Asset;
+                if (asset)
+                {
+                    Type type = asset.GetType();
+                    referenceCache[(type, reference.Path)] = asset;
+                }
+            }
         }
 
         /// <summary>
