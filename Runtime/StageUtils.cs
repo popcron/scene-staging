@@ -28,47 +28,55 @@ namespace Popcron.SceneStaging
 #if UNITY_EDITOR
         [DidReloadScripts]
 #endif
-        private static void Initialize()
+        private static void Loaded()
         {
             if (random is null)
             {
-                random = new Random();
-                fullTypeNameToType = new Dictionary<string, Type>();
-                typeToMembers = new Dictionary<Type, MemberInfo[]>();
-                typeToTypeType = new Dictionary<Type, TypeType>();
-                List<Type> list = new List<Type>();
-                Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
-                foreach (Assembly assembly in assemblies)
-                {
-                    Type[] types = assembly.GetTypes();
-                    foreach (Type type in types)
-                    {
-                        fullTypeNameToType[type.FullName] = type;
-                        typeToMembers[type] = FindMembers(type).ToArray();
-
-                        if (type.IsEnum)
-                        {
-                            typeToTypeType[type] = TypeType.Enum;
-                        }
-                        else if (type.IsClass)
-                        {
-                            typeToTypeType[type] = TypeType.Class;
-                        }
-                        else if (type.IsValueType)
-                        {
-                            typeToTypeType[type] = TypeType.Value;
-                        }
-                        else
-                        {
-                            typeToTypeType[type] = TypeType.Other;
-                        }
-
-                        list.Add(type);
-                    }
-                }
-
-                all = list.ToArray();
+                Initialize();
             }
+        }
+
+        /// <summary>
+        /// Initializes the utils class.
+        /// </summary>
+        public static void Initialize()
+        {
+            random = new Random();
+            fullTypeNameToType = new Dictionary<string, Type>();
+            typeToMembers = new Dictionary<Type, MemberInfo[]>();
+            typeToTypeType = new Dictionary<Type, TypeType>();
+            List<Type> list = new List<Type>();
+            Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            foreach (Assembly assembly in assemblies)
+            {
+                Type[] types = assembly.GetTypes();
+                foreach (Type type in types)
+                {
+                    fullTypeNameToType[type.FullName] = type;
+                    typeToMembers[type] = FindMembers(type).ToArray();
+
+                    if (type.IsEnum)
+                    {
+                        typeToTypeType[type] = TypeType.Enum;
+                    }
+                    else if (type.IsClass)
+                    {
+                        typeToTypeType[type] = TypeType.Class;
+                    }
+                    else if (type.IsValueType)
+                    {
+                        typeToTypeType[type] = TypeType.Value;
+                    }
+                    else
+                    {
+                        typeToTypeType[type] = TypeType.Other;
+                    }
+
+                    list.Add(type);
+                }
+            }
+
+            all = list.ToArray();
         }
 
         /// <summary>
@@ -76,6 +84,19 @@ namespace Popcron.SceneStaging
         /// </summary>
         private static bool ShouldIgnore(Type type, MemberInfo member)
         {
+            //ignore if it has a not stage saved attribute
+            bool notStageSaved = member.GetCustomAttribute<NotStageSerializedAttribute>() != null;
+            if (notStageSaved)
+            {
+                return true;
+            }
+
+            //member is deprecated
+            if (member.GetCustomAttribute<ObsoleteAttribute>() != null)
+            {
+                return true;
+            }
+
             if (member.MemberType == MemberTypes.Property)
             {
                 if (member.Name == "name" || member.Name == "tag")
@@ -117,13 +138,6 @@ namespace Popcron.SceneStaging
                         continue;
                     }
 
-                    //ignore if it has a not stage saved attribute
-                    bool notStageSaved = member.GetCustomAttribute<NotStageSerializedAttribute>() != null;
-                    if (notStageSaved)
-                    {
-                        continue;
-                    }
-
                     if (ShouldIgnore(type, member))
                     {
                         continue;
@@ -148,13 +162,21 @@ namespace Popcron.SceneStaging
                     }
                     else if (member is PropertyInfo property)
                     {
-                        if (property.GetMethod != null && property.SetMethod != null)
+                        bool addProperty = false;
+                        if (property.GetMethod != null && property.GetMethod.IsPublic)
                         {
-                            if (property.GetMethod.IsPublic && property.SetMethod.IsPublic)
-                            {
-                                //only add properties that have public getter and setters
-                                members.Add(property);
-                            }
+                            addProperty = true;
+                        }
+
+                        if (!addProperty && property.SetMethod != null && property.SetMethod.IsPublic)
+                        {
+                            addProperty = true;
+                        }
+
+                        //only add properties that have a public getter or setters
+                        if (addProperty)
+                        {
+                            members.Add(property);
                         }
                     }
                 }
