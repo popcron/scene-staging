@@ -300,7 +300,7 @@ namespace Popcron.SceneStaging
                 Prop prop = stage.Props[index];
                 GameObject gameObject = propObjects[prop.ID].gameObject;
                 int componentsCount = prop.Count;
-                for (int i = componentsCount - 1; i >= 0; i--)
+                for (int i = 0; i < componentsCount; i++)
                 {
                     Component component = prop[i];
                     if (component.FullTypeName == "$prefab")
@@ -309,14 +309,28 @@ namespace Popcron.SceneStaging
                     }
 
                     Type type = component.Type;
-                    ComponentProcessor processor = ComponentProcessor.Get(type);
-                    if (processor != null)
+                    if (type != null)
                     {
-                        processor.GetComponent(component, gameObject);
+                        ComponentProcessor processor = ComponentProcessor.Get(type);
+                        if (processor != null)
+                        {
+                            processor.GetComponent(component, gameObject);
+                        }
+                        else
+                        {
+                            throw new NoProcessorFound($"No processor available for {type} when creating component at index {i} in prop {prop.ID}.");
+                        }
                     }
                     else
                     {
-                        Debug.LogError($"no processor available for {type}");
+                        if (component.FullTypeName != null)
+                        {
+                            Debug.LogError($"Component at index {i} in prop {prop.ID} contains a null type but the type name is {component.FullTypeName}.");
+                        }
+                        else
+                        {
+                            Debug.LogError($"Component at index {i} in prop {i} has no type provided.");
+                        }
                     }
                 }
 
@@ -394,7 +408,10 @@ namespace Popcron.SceneStaging
                                             }
                                             else if (property != null)
                                             {
-                                                property.SetValue(unityComponent, transformObject.transform);
+                                                if (property.SetMethod != null)
+                                                {
+                                                    property.SetValue(unityComponent, transformObject.transform);
+                                                }
                                             }
                                         }
                                     }

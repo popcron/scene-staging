@@ -141,7 +141,10 @@ namespace Popcron.SceneStaging
                                         }
                                         else if (property != null)
                                         {
-                                            transformValue = property.GetValue(unityComponent) as Transform;
+                                            if (property.GetMethod != null)
+                                            {
+                                                transformValue = property.GetValue(unityComponent) as Transform;
+                                            }
                                         }
 
                                         if (transformValue)

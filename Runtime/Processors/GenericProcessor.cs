@@ -37,6 +37,11 @@ namespace Popcron.SceneStaging
                     }
                     else if (property != null)
                     {
+                        if (property.GetMethod is null)
+                        {
+                            continue;
+                        }
+
                         fieldType = property.PropertyType;
                         value = property.GetValue(unityComponent);
                     }
@@ -106,7 +111,7 @@ namespace Popcron.SceneStaging
             }
         }
 
-        private async void AssignEventually(FieldInfo field, PropertyInfo property, UnityComponent unityComponent, GameObject gameObject, int index, int timeout = 500)
+        private static async void AssignEventually(FieldInfo field, PropertyInfo property, UnityComponent unityComponent, GameObject gameObject, int index, int timeout = 500)
         {
             int frame = 0;
             while (frame < timeout)
@@ -142,6 +147,11 @@ namespace Popcron.SceneStaging
                     }
                     else if (property != null)
                     {
+                        if (property.SetMethod is null)
+                        {
+                            continue;
+                        }
+
                         fieldType = property.PropertyType;
                     }
 
@@ -203,7 +213,7 @@ namespace Popcron.SceneStaging
             }
         }
 
-        private void SetValue(FieldInfo field, PropertyInfo property, object obj, object value)
+        private static void SetValue(FieldInfo field, PropertyInfo property, object obj, object value)
         {
             if (field != null)
             {
