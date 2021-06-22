@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -9,7 +10,14 @@ namespace Popcron.SceneStaging
     [Serializable]
     public class Stage : IEquatable<Stage>
     {
-        public const ushort CurrentVersion = 1;
+        public const ushort CurrentVersion = 2;
+
+        public delegate void OnPropAddedDelegate(Stage stage, Prop prop);
+
+        /// <summary>
+        /// Occurs when a prop has been added to a stage.
+        /// </summary>
+        public static OnPropAddedDelegate OnPropAdded { get; set; }
 
         [SerializeField]
         private ushort version = CurrentVersion;
@@ -24,13 +32,33 @@ namespace Popcron.SceneStaging
         private List<Prop> props = new List<Prop>();
 
         private Dictionary<int, Prop> idToProp = null;
+        private ReadOnlyCollection<Prop> propsReadOnly = null;
 
         /// <summary>
-        /// Unique ID of this map.
+        /// The pretty display name of this stage.
+        /// </summary>
+        public string DisplayName => displayName;
+
+        /// <summary>
+        /// Unique ID of this stage.
         /// </summary>
         public string ID => id;
-        public string DisplayName => displayName;
-        public List<Prop> Props => props;
+
+        /// <summary>
+        /// Collection of all props in this stage.
+        /// </summary>
+        public ReadOnlyCollection<Prop> Props
+        {
+            get
+            {
+                if (propsReadOnly is null || propsReadOnly.Count != props.Count)
+                {
+                    propsReadOnly = props.AsReadOnly();
+                }
+
+                return propsReadOnly;
+            }
+        }
 
         /// <summary>
         /// The version in which this stage was created in.
@@ -62,6 +90,9 @@ namespace Popcron.SceneStaging
             return false;
         }
 
+        /// <summary>
+        /// Returns a JSON string that represents this stage.
+        /// </summary>
         public string ToJson(bool prettyPrint = true) => Conversion.ToJson(this, prettyPrint);
 
         /// <summary>
@@ -181,6 +212,7 @@ namespace Popcron.SceneStaging
         public void AddProp(Prop prop)
         {
             props.Add(prop);
+            propsReadOnly = null;
 
             if (idToProp == null)
             {
@@ -189,8 +221,8 @@ namespace Popcron.SceneStaging
 
             idToProp[prop.ID] = prop;
 
-            //todo: event here
-            //new AddedPropToStage(this, prop).Dispatch();
+            //invoke event
+            OnPropAdded?.Invoke(this, prop);
         }
 
         public Prop AddProp(GameObject gameObject, int parent = -1)

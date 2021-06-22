@@ -17,8 +17,20 @@ namespace Popcron.SceneStaging
             set => stage = value.Clone();
         }
 
+        /// <summary>
+        /// The pretty display name of this stage.
+        /// </summary>
         public string DisplayName => stage.DisplayName;
+
+        /// <summary>
+        /// Unique ID of this stage.
+        /// </summary>
         public string ID => stage.ID;
+
+        /// <summary>
+        /// Returns a JSON string that represents this stage.
+        /// </summary>
+        public string ToJson(bool prettyPrint = true) => stage.ToJson(prettyPrint);
 
         /// <summary>
         /// Creates a new stage asset with this stage object.

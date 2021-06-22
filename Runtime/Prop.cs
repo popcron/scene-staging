@@ -10,6 +10,13 @@ namespace Popcron.SceneStaging
     [Serializable]
     public class Prop : IList<Component>, IEquatable<Prop>
     {
+        public delegate void OnAddedComponentDelegate(Prop prop, Component component);
+
+        /// <summary>
+        /// Happens after a component has been added to a prop.
+        /// </summary>
+        public static OnAddedComponentDelegate OnAddedComponent { get; set; }
+
         [SerializeField]
         private int id;
 
@@ -214,7 +221,11 @@ namespace Popcron.SceneStaging
         /// <summary>
         /// Adds this component to the prop.
         /// </summary>
-        public void AddComponent(Component component) => components.Add(component);
+        public void AddComponent(Component component)
+        {
+            components.Add(component);
+            OnAddedComponent?.Invoke(this, component);
+        }
 
         /// <summary>
         /// Returns a component of this type or adds one if on already exists.
@@ -282,7 +293,7 @@ namespace Popcron.SceneStaging
         int IList<Component>.IndexOf(Component component) => components.IndexOf(component);
         void IList<Component>.Insert(int index, Component component) => components.Insert(index, component);
         void IList<Component>.RemoveAt(int index) => components.RemoveAt(index);
-        void ICollection<Component>.Add(Component component) => components.Add(component);
+        void ICollection<Component>.Add(Component component) => AddComponent(component);
         public bool Contains(Component component) => components.Contains(component);
         public void CopyTo(Component[] array, int arrayIndex) => components.CopyTo(array, arrayIndex);
         public bool Remove(Component component) => components.Remove(component);
