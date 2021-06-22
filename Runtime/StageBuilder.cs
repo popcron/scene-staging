@@ -314,7 +314,7 @@ namespace Popcron.SceneStaging
                         ComponentProcessor processor = ComponentProcessor.Get(type);
                         if (processor != null)
                         {
-                            processor.GetComponent(component, gameObject);
+                            processor.GetOrAddComponent(component, gameObject);
                         }
                         else
                         {
@@ -366,7 +366,7 @@ namespace Popcron.SceneStaging
                     {
                         try
                         {
-                            Object unityComponent = processor.GetComponent(component, gameObject);
+                            Object unityComponent = processor.GetOrAddComponent(component, gameObject);
                             processor.Stage = stage;
                             processor.LoadComponent(component, unityComponent);
 

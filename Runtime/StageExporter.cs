@@ -94,7 +94,7 @@ namespace Popcron.SceneStaging
                     if (processor != null)
                     {
                         Component component = prop.AddComponent<GameObject>();
-                        Object unityComponent = processor.GetComponent(component, gameObject);
+                        Object unityComponent = processor.GetOrAddComponent(component, gameObject);
                         processor.Stage = stage;
                         processor.SaveComponent(component, unityComponent);
                     }
@@ -116,7 +116,7 @@ namespace Popcron.SceneStaging
                         if (processor != null)
                         {
                             Component comp = new Component(componentType.FullName);
-                            Object unityComponent = processor.GetComponent(comp, gameObject);
+                            Object unityComponent = processor.GetOrAddComponent(comp, gameObject);
                             if (unityComponent)
                             {
                                 processor.Stage = stage;

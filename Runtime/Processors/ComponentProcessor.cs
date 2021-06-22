@@ -61,11 +61,11 @@ namespace Popcron.SceneStaging
         /// <summary>
         /// Returns an existing component or creates one from this game object.
         /// </summary>
-        public virtual Object GetComponent(Component component, GameObject gameObject)
+        public virtual Object GetOrAddComponent(Component component, GameObject gameObject)
         {
             if (component.Type != null)
             {
-                if (component.FullTypeName.Equals("UnityEngine.GameObject"))
+                if (component.Type == typeof(GameObject))
                 {
                     return gameObject;
                 }
