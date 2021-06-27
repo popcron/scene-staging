@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -9,24 +8,7 @@ namespace Popcron.SceneStaging
     public abstract class ComponentProcessor
     {
         private static List<ComponentProcessor> matchingProcessors = new List<ComponentProcessor>();
-        private static Dictionary<string, ComponentProcessor> typeToProcessor = new Dictionary<string, ComponentProcessor>();
-        private static ReadOnlyCollection<ComponentProcessor> all;
-
-        /// <summary>
-        /// List of all component processors.
-        /// </summary>
-        public static ReadOnlyCollection<ComponentProcessor> All
-        {
-            get
-            {
-                if (all is null)
-                {
-                    FindAllProcessors();
-                }
-
-                return all;
-            }
-        }
+        private static List<ComponentProcessor> all = new List<ComponentProcessor>();
 
         /// <summary>
         /// The map that this processor is running against.
@@ -99,116 +81,130 @@ namespace Popcron.SceneStaging
                 return null;
             }
 
-            string typeFullName = type.FullName;
+            string typeFullName = type.AssemblyQualifiedName;
             return Get(typeFullName);
         }
 
         /// <summary>
         /// Returns a processor that is meant to process this kind of component.
         /// </summary>
-        public static ComponentProcessor Get(string typeFullName)
+        public static ComponentProcessor Get(string assemblyQualifiedTypeName)
         {
-            if (string.IsNullOrEmpty(typeFullName))
+            if (string.IsNullOrEmpty(assemblyQualifiedTypeName))
             {
                 return null;
             }
 
-            Type type = StageUtils.GetType(typeFullName);
-            if (type is null)
+            if (all.Count == 0)
             {
-                Debug.LogError($"No type found for {typeFullName}");
-                return null;
+                LoadDefaultProcessors();
             }
 
-            if (typeToProcessor.TryGetValue(typeFullName, out ComponentProcessor typeProcessor))
+            matchingProcessors.Clear();
+            int allCount = all.Count;
+            Type type = StageUtils.GetType(assemblyQualifiedTypeName);
+            for (int i = 0; i < allCount; i++)
             {
-                return typeProcessor;
-            }
-            else
-            {
-                matchingProcessors.Clear();
-                int allCount = All.Count;
-                for (int i = 0; i < allCount; i++)
+                ComponentProcessor processor = all[i];
+                if (processor.IsMatch(type))
                 {
-                    ComponentProcessor processor = All[i];
-                    if (processor.IsMatch(type))
+                    matchingProcessors.Add(processor);
+                }
+            }
+
+            ComponentProcessor typeProcessor = null;
+            int matchingCount = matchingProcessors.Count;
+            if (matchingCount == 1)
+            {
+                //only 1 matching so return it
+                typeProcessor = matchingProcessors[0];
+            }
+            else if (matchingCount > 1)
+            {
+                //more than 1 found so return the first that isnt a generic processor
+                for (int i = 0; i < matchingCount; i++)
+                {
+                    ComponentProcessor processor = matchingProcessors[i];
+                    if (!(processor is GenericProcessor))
                     {
-                        matchingProcessors.Add(processor);
+                        typeProcessor = processor;
+                        break;
                     }
                 }
-
-                int matchingCount = matchingProcessors.Count;
-                if (matchingCount == 1)
-                {
-                    //only 1 matching so return it
-                    typeProcessor = matchingProcessors[0];
-                }
-                else if (matchingCount > 1)
-                {
-                    //more than 1 found so return the first that isnt a generic processor
-                    for (int i = 0; i < matchingCount; i++)
-                    {
-                        ComponentProcessor processor = matchingProcessors[i];
-                        if (!(processor is GenericProcessor))
-                        {
-                            typeProcessor = processor;
-                            break;
-                        }
-                    }
-                }
-
-                typeToProcessor[typeFullName] = typeProcessor;
-                return typeProcessor;
             }
+
+            return typeProcessor;
         }
 
-        private static void FindAllProcessors()
+        [RuntimeInitializeOnLoadMethod]
+        private static void LoadDefaultProcessors()
         {
-            if (Debug.isDebugBuild)
-            {
-                Debug.Log("Looking for all component processors");
-            }
-
-            List<ComponentProcessor> processors = new List<ComponentProcessor>();
-            List<Type> processorTypes = new List<Type>();
-            foreach (Type type in StageUtils.GetAllAssignableFrom<ComponentProcessor>())
-            {
-                if (!type.IsAbstract)
-                {
-                    ComponentProcessor processor = Activator.CreateInstance(type) as ComponentProcessor;
-                    if (processor != null)
-                    {
-                        processors.Add(processor);
-                        processorTypes.Add(type);
-                    }
-                }
-            }
-
             //ensure the builtin processors are included
-            if (!processorTypes.Contains(typeof(GenericProcessor)))
+            if (!IsRegistered<GenericProcessor>())
             {
-                processors.Add(new GenericProcessor());
+                RegisterProcessor<GenericProcessor>();
             }
 
-            if (!processorTypes.Contains(typeof(GameObjectProcessor)))
+            if (!IsRegistered<GameObjectProcessor>())
             {
-                processors.Add(new GameObjectProcessor());
+                RegisterProcessor<GameObjectProcessor>();
             }
 
-            if (!processorTypes.Contains(typeof(TransformProcessor)))
+            if (!IsRegistered<TransformProcessor>())
             {
-                processors.Add(new TransformProcessor());
-            }
-
-            all = processors.AsReadOnly();
-            foreach (ComponentProcessor processor in all)
-            {
-                if (Debug.isDebugBuild)
-                {
-                    Debug.Log($"Loaded component processor {processor.GetType().Name}");
-                }
+                RegisterProcessor<TransformProcessor>();
             }
         }
+
+        /// <summary>
+        /// Returns true if this type of component processor is already registered.
+        /// </summary>
+        public static bool IsRegistered(Type type)
+        {
+            if (all is null)
+            {
+                return false;
+            }
+
+            int allCount = all.Count;
+            for (int i = 0; i < allCount; i++)
+            {
+                ComponentProcessor existingProcessor = all[i];
+                if (existingProcessor != null && existingProcessor.GetType() == type)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Returns true if this type of component processor is already registered.
+        /// </summary>
+        public static bool IsRegistered<T>() where T : ComponentProcessor => IsRegistered(typeof(T));
+
+        /// <summary>
+        /// Registers this component processor to a global static collection.
+        /// </summary>
+        public static void RegisterProcessor(Type type)
+        {
+            if (!IsRegistered(type))
+            {
+                if (all is null)
+                {
+                    all = new List<ComponentProcessor>();
+                }
+
+                ComponentProcessor processor = Activator.CreateInstance(type) as ComponentProcessor;
+                all.Add(processor);
+            }
+        }
+
+        /// <summary>
+        /// Registers this component processor to a global static collection.
+        /// </summary>
+        public static void RegisterProcessor<T>() where T : ComponentProcessor => RegisterProcessor(typeof(T));
     }
 
     public abstract class ComponentProcessor<T> : ComponentProcessor where T : Object

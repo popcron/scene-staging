@@ -303,7 +303,7 @@ namespace Popcron.SceneStaging
                 for (int i = 0; i < componentsCount; i++)
                 {
                     Component component = prop[i];
-                    if (component.FullTypeName == "$prefab")
+                    if (component.AssemblyQualifiedName == "$prefab")
                     {
                         continue;
                     }
@@ -323,9 +323,9 @@ namespace Popcron.SceneStaging
                     }
                     else
                     {
-                        if (component.FullTypeName != null)
+                        if (component.AssemblyQualifiedName != null)
                         {
-                            Debug.LogError($"Component at index {i} in prop {prop.ID} contains a null type but the type name is {component.FullTypeName}.");
+                            Debug.LogError($"Component at index {i} in prop {prop.ID} contains a null type but the type name is {component.AssemblyQualifiedName}.");
                         }
                         else
                         {

@@ -47,7 +47,14 @@ namespace Popcron.SceneStaging
             get
             {
                 Component component = GetComponent<GameObject>();
-                return component.GetRaw("name");
+                if (component != null)
+                {
+                    return component.GetRaw("name");
+                }
+                else
+                {
+                    return null;
+                }
             }
         }
 
@@ -206,9 +213,9 @@ namespace Popcron.SceneStaging
         /// <summary>
         /// Adds a component of this type as a string to the prop.
         /// </summary>
-        public Component AddComponent(string fullTypeName, IList<Variable> variables = null)
+        public Component AddComponent(string assemblyQualifiedName, IList<Variable> variables = null)
         {
-            Component newComponent = new Component(fullTypeName, variables);
+            Component newComponent = new Component(assemblyQualifiedName, variables);
             AddComponent(newComponent);
             return newComponent;
         }
@@ -216,7 +223,7 @@ namespace Popcron.SceneStaging
         /// <summary>
         /// Adds a component of this type to the prop.
         /// </summary>
-        public Component AddComponent<T>(IList<Variable> variables = null) where T : Object => AddComponent(typeof(T).FullName, variables);
+        public Component AddComponent<T>(IList<Variable> variables = null) where T : Object => AddComponent(typeof(T).AssemblyQualifiedName, variables);
 
         /// <summary>
         /// Adds this component to the prop.
@@ -230,19 +237,19 @@ namespace Popcron.SceneStaging
         /// <summary>
         /// Returns a component of this type or adds one if on already exists.
         /// </summary>
-        public Component GetOrAddComponent(string fullTypeName)
+        public Component GetOrAddComponent(string assemblyQualifiedName)
         {
             int componentCount = components.Count;
             for (int i = 0; i < componentCount; i++)
             {
                 Component component = components[i];
-                if (component.FullTypeName == fullTypeName)
+                if (component.AssemblyQualifiedName == assemblyQualifiedName)
                 {
                     return component;
                 }
             }
 
-            return AddComponent(fullTypeName);
+            return AddComponent(assemblyQualifiedName);
         }
 
         /// <summary>

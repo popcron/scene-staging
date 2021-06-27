@@ -5,7 +5,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace Popcron.SceneStaging.UnityEditor
+namespace Popcron.SceneStaging
 {
     public class StageMenuItems
     {

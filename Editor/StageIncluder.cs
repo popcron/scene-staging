@@ -1,6 +1,4 @@
-﻿using UnityEditor;
-
-namespace Popcron.SceneStaging.UnityEditor
+﻿namespace Popcron.SceneStaging
 {
     public class StageIncluder
     {

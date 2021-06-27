@@ -9,7 +9,6 @@ using UnityObject = UnityEngine.Object;
 using UnityComponent = UnityEngine.Component;
 
 #if UNITY_EDITOR
-using UnityEditor.Callbacks;
 using UnityEditor;
 #endif
 
@@ -19,65 +18,9 @@ namespace Popcron.SceneStaging
     {
         private static UnityObject[] resources;
         private static Random random;
-        private static Dictionary<string, Type> fullTypeNameToType;
-        private static Dictionary<Type, MemberInfo[]> typeToMembers;
-        private static Dictionary<Type, TypeType> typeToTypeType;
-        private static Type[] all;
-
-        [RuntimeInitializeOnLoadMethod]
-#if UNITY_EDITOR
-        [DidReloadScripts]
-#endif
-        private static void Loaded()
-        {
-            if (random is null)
-            {
-                Initialize();
-            }
-        }
-
-        /// <summary>
-        /// Initializes the utils class.
-        /// </summary>
-        public static void Initialize()
-        {
-            random = new Random();
-            fullTypeNameToType = new Dictionary<string, Type>();
-            typeToMembers = new Dictionary<Type, MemberInfo[]>();
-            typeToTypeType = new Dictionary<Type, TypeType>();
-            List<Type> list = new List<Type>();
-            Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
-            foreach (Assembly assembly in assemblies)
-            {
-                Type[] types = assembly.GetTypes();
-                foreach (Type type in types)
-                {
-                    fullTypeNameToType[type.FullName] = type;
-                    typeToMembers[type] = FindMembers(type).ToArray();
-
-                    if (type.IsEnum)
-                    {
-                        typeToTypeType[type] = TypeType.Enum;
-                    }
-                    else if (type.IsClass)
-                    {
-                        typeToTypeType[type] = TypeType.Class;
-                    }
-                    else if (type.IsValueType)
-                    {
-                        typeToTypeType[type] = TypeType.Value;
-                    }
-                    else
-                    {
-                        typeToTypeType[type] = TypeType.Other;
-                    }
-
-                    list.Add(type);
-                }
-            }
-
-            all = list.ToArray();
-        }
+        private static Dictionary<string, Type> nameToType = new Dictionary<string, Type>();
+        private static Dictionary<Type, MemberInfo[]> typeToMembers = new Dictionary<Type, MemberInfo[]>();
+        private static Dictionary<Type, TypeType> typeToTypeType = new Dictionary<Type, TypeType>();
 
         /// <summary>
         /// Shoulds this specific member declared inside this type be ignored?
@@ -136,7 +79,7 @@ namespace Popcron.SceneStaging
             return false;
         }
 
-        private static List<MemberInfo> FindMembers(Type type)
+        private static MemberInfo[] FindMembers(Type type)
         {
             List<MemberInfo> members = new List<MemberInfo>();
             while (!type.Equals(typeof(MonoBehaviour)) && !(type is null))
@@ -204,7 +147,7 @@ namespace Popcron.SceneStaging
                 type = type.BaseType;
             }
 
-            return members;
+            return members.ToArray();
         }
 
         /// <summary>
@@ -212,14 +155,18 @@ namespace Popcron.SceneStaging
         /// </summary>
         public static MemberInfo[] GetMembers(Type type)
         {
-            if (typeToMembers is null)
+            if (type != null)
             {
-                Initialize();
-            }
-
-            if (type != null && typeToMembers.TryGetValue(type, out MemberInfo[] members))
-            {
-                return members;
+                if (typeToMembers.TryGetValue(type, out MemberInfo[] members))
+                {
+                    return members;
+                }
+                else
+                {
+                    members = FindMembers(type);
+                    typeToMembers[type] = members;
+                    return members;
+                }
             }
             else
             {
@@ -229,51 +176,72 @@ namespace Popcron.SceneStaging
 
         public static TypeType GetTypeType(Type type)
         {
-            if (typeToTypeType is null)
+            if (type != null)
             {
-                Initialize();
-            }
-
-            if (typeToTypeType.TryGetValue(type, out TypeType typeType))
-            {
-                return typeType;
-            }
-            else
-            {
-                if (type.IsArray)
+                if (typeToTypeType.TryGetValue(type, out TypeType typeType))
                 {
-                    return TypeType.Array;
+                    return typeType;
                 }
                 else
                 {
-                    return TypeType.Other;
+                    if (type.IsArray)
+                    {
+                        typeType = TypeType.Array;
+                    }
+                    else if (type.IsEnum)
+                    {
+                        typeType = TypeType.Enum;
+                    }
+                    else if (type.IsClass)
+                    {
+                        typeType = TypeType.Class;
+                    }
+                    else if (type.IsValueType)
+                    {
+                        typeType = TypeType.Value;
+                    }
+                    else
+                    {
+                        typeType = TypeType.Other;
+                    }
+
+                    typeToTypeType[type] = typeType;
+                    return typeType;
                 }
+            }
+            else
+            {
+                return TypeType.Other;
             }
         }
 
         /// <summary>
         /// Returns the type with this full name.
         /// </summary>
-        public static Type GetType(string fullTypeName)
+        public static Type GetType(string assemblyQualifiedName)
         {
-            if (string.IsNullOrEmpty(fullTypeName))
+            if (string.IsNullOrEmpty(assemblyQualifiedName))
             {
                 return null;
             }
 
-            if (fullTypeNameToType is null)
+            if (nameToType.TryGetValue(assemblyQualifiedName, out Type resultType))
             {
-                Initialize();
-            }
-
-            if (fullTypeNameToType.TryGetValue(fullTypeName, out Type type))
-            {
-                return type;
+                return resultType;
             }
             else
             {
-                return null;
+                resultType = Type.GetType(assemblyQualifiedName);
+                if (resultType != null)
+                {
+                    nameToType[resultType.AssemblyQualifiedName] = resultType;
+                    nameToType[resultType.FullName] = resultType;
+                    nameToType[resultType.Name] = resultType;
+                    return resultType;
+                }
             }
+
+            return null;
         }
 
 #if UNITY_EDITOR
@@ -321,23 +289,6 @@ namespace Popcron.SceneStaging
             SceneManager.SetActiveScene(scene);
         }
 
-        public static IEnumerable<Type> GetAllAssignableFrom<T>()
-        {
-            if (all is null)
-            {
-                Initialize();
-            }
-
-            Type baseType = typeof(T);
-            foreach (Type type in all)
-            {
-                if (baseType.IsAssignableFrom(type))
-                {
-                    yield return type;
-                }
-            }
-        }
-
         /// <summary>
         /// Returns a new unique ID for stages.
         /// </summary>
@@ -347,7 +298,7 @@ namespace Popcron.SceneStaging
         {
             if (random is null)
             {
-                Initialize();
+                random = new Random();
             }
 
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";

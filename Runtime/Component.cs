@@ -9,7 +9,7 @@ namespace Popcron.SceneStaging
     public class Component : IList<Variable>
     {
         [SerializeField]
-        private string fullTypeName;
+        private string assemblyQualifiedName;
 
         [SerializeField]
         private List<Variable> variables = new List<Variable>(32);
@@ -26,7 +26,7 @@ namespace Popcron.SceneStaging
             {
                 if (type is null)
                 {
-                    type = StageUtils.GetType(fullTypeName);
+                    type = StageUtils.GetType(assemblyQualifiedName);
                 }
 
                 return type;
@@ -36,7 +36,7 @@ namespace Popcron.SceneStaging
         /// <summary>
         /// The full name of the component type.
         /// </summary>
-        public string FullTypeName => fullTypeName;
+        public string AssemblyQualifiedName => assemblyQualifiedName;
 
         /// <summary>
         /// The amount of variables on this component.
@@ -51,9 +51,9 @@ namespace Popcron.SceneStaging
             set => variables[index] = value;
         }
 
-        public Component(string fullTypeName, IList<Variable> variables = null)
+        public Component(string assemblyQualifiedName, IList<Variable> variables = null)
         {
-            this.fullTypeName = fullTypeName;
+            this.assemblyQualifiedName = assemblyQualifiedName;
             this.variables = new List<Variable>();
 
             if (variables != null)

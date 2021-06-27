@@ -115,7 +115,7 @@ namespace Popcron.SceneStaging
                         processor = ComponentProcessor.Get(componentType);
                         if (processor != null)
                         {
-                            Component comp = new Component(componentType.FullName);
+                            Component comp = new Component(componentType.AssemblyQualifiedName);
                             Object unityComponent = processor.GetOrAddComponent(comp, gameObject);
                             if (unityComponent)
                             {

@@ -563,7 +563,7 @@ namespace Popcron.SceneStaging
                 {
                     Component comp = prop[c];
                     JObject compJson = new JObject();
-                    compJson.Add("$type", comp.FullTypeName);
+                    compJson.Add("$type", comp.AssemblyQualifiedName);
 
                     //fill in the variables for this component
                     int variablesCount = comp.Count;

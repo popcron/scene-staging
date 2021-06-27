@@ -1,7 +1,6 @@
 ﻿using UnityEditor;
-using UnityEngine;
 
-namespace Popcron.SceneStaging.UnityEditor
+namespace Popcron.SceneStaging
 {
     public class SaveSceneAsStage : AssetModificationProcessor
     {

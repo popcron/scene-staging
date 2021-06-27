@@ -1,7 +1,7 @@
-﻿using UnityEditor;
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEditor;
 
-namespace Popcron.SceneStaging.UnityEditor
+namespace Popcron.SceneStaging
 {
     [CustomEditor(typeof(ReferencesDatabase))]
     public class ReferencesDatabaseInspector : Editor

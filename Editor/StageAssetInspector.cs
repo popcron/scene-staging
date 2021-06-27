@@ -1,6 +1,6 @@
 ﻿using UnityEditor;
 
-namespace Popcron.SceneStaging.UnityEditor
+namespace Popcron.SceneStaging
 {
     [CustomEditor(typeof(StageAsset))]
     public class StageAssetInspector : Editor

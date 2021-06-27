@@ -54,7 +54,7 @@ namespace Popcron.SceneStaging
 
                     if (!string.IsNullOrEmpty(pathToPrefab))
                     {
-                        string fullTypeName = fieldType.FullName;
+                        string fullTypeName = fieldType.AssemblyQualifiedName;
                         stringBuilder.Clear();
                         stringBuilder.Append("prefab:");
                         stringBuilder.Append(pathToPrefab);
