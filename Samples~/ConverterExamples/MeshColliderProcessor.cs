@@ -4,6 +4,12 @@ namespace Popcron.SceneStaging
 {
     public class MeshColliderProcessor : ComponentProcessor<MeshCollider>
     {
+        [RuntimeInitializeOnLoadMethod]
+        private static void AutoRegister()
+        {
+            RegisterProcessor<MeshColliderProcessor>();
+        }
+
         protected override void Save(Component mapObject, MeshCollider meshCollider)
         {
             mapObject.Set(nameof(meshCollider.sharedMesh), meshCollider.sharedMesh);

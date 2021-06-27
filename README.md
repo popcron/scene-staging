@@ -28,7 +28,7 @@ StageBuilder.BuildAsync(loadedStage);
 The resulting JSON string looks like [this](https://gdl.space/ikeqaduheq.json).
 
 ## Processors
-Processors in this package describe a class that handles the conversion of a unity component from and to a stage component type. Included are the required Transform and GameObject processors, as well as a generic processor that handles anything else that is a component (including user made MonoBehaviour types).
+Processors in this package describe a class that handles the conversion of a unity component from and to a stage component type. Included are the required Transform and GameObject processors, as well as a generic processor that handles anything else that is a component (including user made MonoBehaviour types). They must also be registered via the `ComponentProcessor.RegistereProcessor<T>()` method, a handy trick that can help expedite this is by registering inside a method with the `RuntimeInitializeOnLoadMethod` attribute (as seen in the example below).
 
 Extending the functionality can be done by creating a new class that inherits from a ComponentProcessor, letting you decide what gets saved and loaded.
 
@@ -42,7 +42,13 @@ using Component = Popcron.SceneStaging.Component;
 
 public class SpriteRendererProcessor : ComponentProcessor<SpriteRenderer>
 {
-	protected override void Load(Component component, SpriteRenderer spriteRenderer)
+    [RuntimeInitializeOnLoadMethod]
+    private static void AutoRegister()
+    {
+        RegisterProcessor<SpriteRendererProcessor>();
+    }
+
+	  protected override void Load(Component component, SpriteRenderer spriteRenderer)
     {
         component.Set("sprite", spriteRenderer.sprite);
         component.Set("color", spriteRenderer.color);

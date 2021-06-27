@@ -4,6 +4,12 @@ namespace Popcron.SceneStaging
 {
     public class SphereColliderProcessor : ComponentProcessor<SphereCollider>
     {
+        [RuntimeInitializeOnLoadMethod]
+        private static void AutoRegister()
+        {
+            RegisterProcessor<SphereColliderProcessor>();
+        }
+
         protected override void Save(Component mapObject, SphereCollider sphereCollider)
         {
             mapObject.Set(nameof(sphereCollider.radius), sphereCollider.radius);

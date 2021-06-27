@@ -5,6 +5,12 @@ namespace Popcron.SceneStaging
 {
     public class LightProcessor : ComponentProcessor<Light>
     {
+        [RuntimeInitializeOnLoadMethod]
+        private static void AutoRegister()
+        {
+            RegisterProcessor<LightProcessor>();
+        }
+
         protected override void Save(Component component, Light light)
         {
             component.Set(nameof(light.type), light.type);

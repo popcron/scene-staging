@@ -5,6 +5,12 @@ namespace Popcron.SceneStaging
 {
     public class AudioSourceProcessor : ComponentProcessor<AudioSource>
     {
+        [RuntimeInitializeOnLoadMethod]
+        private static void AutoRegister()
+        {
+            RegisterProcessor<AudioSourceProcessor>();
+        }
+
         protected override void Save(Component component, AudioSource audioSource)
         {
             component.Set(nameof(AudioSource.bypassEffects), audioSource.bypassEffects);

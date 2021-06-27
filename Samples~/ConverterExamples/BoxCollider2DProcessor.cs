@@ -4,6 +4,12 @@ namespace Popcron.SceneStaging
 {
     public class BoxCollider2DProcessor : ComponentProcessor<BoxCollider2D>
     {
+        [RuntimeInitializeOnLoadMethod]
+        private static void AutoRegister()
+        {
+            RegisterProcessor<BoxCollider2DProcessor>();
+        }
+
         protected override void Save(Component component, BoxCollider2D boxCollider)
         {
             component.Set(nameof(boxCollider.autoTiling), boxCollider.autoTiling);

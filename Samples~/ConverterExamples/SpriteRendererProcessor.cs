@@ -5,6 +5,12 @@ namespace Popcron.SceneStaging
 {
     public class SpriteRendererProcessor : ComponentProcessor<SpriteRenderer>
     {
+        [RuntimeInitializeOnLoadMethod]
+        private static void AutoRegister()
+        {
+            RegisterProcessor<SpriteRendererProcessor>();
+        }
+
         protected override void Save(Component mapObject, SpriteRenderer spriteRenderer)
         {
             mapObject.Set(nameof(spriteRenderer.sprite), spriteRenderer.sprite);

@@ -5,6 +5,12 @@ namespace Popcron.SceneStaging
 {
     public class MeshRendererProcessor : ComponentProcessor<MeshRenderer>
     {
+        [RuntimeInitializeOnLoadMethod]
+        private static void AutoRegister()
+        {
+            RegisterProcessor<MeshRendererProcessor>();
+        }
+
         protected override void Save(Component mapObject, MeshRenderer meshRenderer)
         {
             mapObject.Set(nameof(meshRenderer.sharedMaterial), meshRenderer.sharedMaterial);

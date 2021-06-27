@@ -4,6 +4,12 @@ namespace Popcron.SceneStaging
 {
     public class MeshFilterProcessor : ComponentProcessor<MeshFilter>
     {
+        [RuntimeInitializeOnLoadMethod]
+        private static void AutoRegister()
+        {
+            RegisterProcessor<MeshFilterProcessor>();
+        }
+
         protected override void Save(Component mapObject, MeshFilter meshFilter)
         {
             mapObject.Set(nameof(meshFilter.sharedMesh), meshFilter.sharedMesh);

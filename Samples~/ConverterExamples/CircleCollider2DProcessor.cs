@@ -4,6 +4,12 @@ namespace Popcron.SceneStaging
 {
     public class CircleCollider2DProcessor : ComponentProcessor<CircleCollider2D>
     {
+        [RuntimeInitializeOnLoadMethod]
+        private static void AutoRegister()
+        {
+            RegisterProcessor<CircleCollider2DProcessor>();
+        }
+
         protected override void Save(Component component, CircleCollider2D circleCollider)
         {
             component.Set(nameof(circleCollider.radius), circleCollider.radius);

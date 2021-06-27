@@ -4,6 +4,12 @@ namespace Popcron.SceneStaging
 {
     public class AudioReverbZoneProcessor : ComponentProcessor<AudioReverbZone>
     {
+        [RuntimeInitializeOnLoadMethod]
+        private static void AutoRegister()
+        {
+            RegisterProcessor<AudioReverbZoneProcessor>();
+        }
+
         protected override void Save(Component component, AudioReverbZone audioReverbZone)
         {
             component.Set(nameof(AudioReverbZone.decayHFRatio), audioReverbZone.decayHFRatio);

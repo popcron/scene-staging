@@ -4,6 +4,12 @@ namespace Popcron.SceneStaging
 {
     public class CapsuleColliderProcessor : ComponentProcessor<CapsuleCollider>
     {
+        [RuntimeInitializeOnLoadMethod]
+        private static void AutoRegister()
+        {
+            RegisterProcessor<CapsuleColliderProcessor>();
+        }
+
         protected override void Save(Component component, CapsuleCollider capsuleCollider)
         {
             component.Set(nameof(capsuleCollider.radius), capsuleCollider.radius);

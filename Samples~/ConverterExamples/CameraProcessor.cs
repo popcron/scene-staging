@@ -4,6 +4,12 @@ namespace Popcron.SceneStaging
 {
     public class CameraProcessor : ComponentProcessor<Camera>
     {
+        [RuntimeInitializeOnLoadMethod]
+        private static void AutoRegister()
+        {
+            RegisterProcessor<CameraProcessor>();
+        }
+
         protected override void Save(Component component, Camera camera)
         {
             component.Set(nameof(camera.orthographic), camera.orthographic);

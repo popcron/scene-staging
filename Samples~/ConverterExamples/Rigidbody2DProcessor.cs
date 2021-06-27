@@ -4,6 +4,12 @@ namespace Popcron.SceneStaging
 {
     public class Rigidbody2DProcessor : ComponentProcessor<Rigidbody2D>
     {
+        [RuntimeInitializeOnLoadMethod]
+        private static void AutoRegister()
+        {
+            RegisterProcessor<Rigidbody2DProcessor>();
+        }
+
         protected override void Save(Component component, Rigidbody2D rigidbody)
         {
             component.Set(nameof(rigidbody.angularDrag), rigidbody.angularDrag);
