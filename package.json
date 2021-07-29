@@ -1,6 +1,6 @@
 {
   "name": "com.popcron.scene-staging",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "displayName": "Popcron Scene Staging",
   "description": "Utility for working with Unity Scenes as JSON objects.",
   "unity": "2018.3",
