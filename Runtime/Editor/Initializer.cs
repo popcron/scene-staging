@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿#if UNITY_EDITOR
+using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 using Original = UnityEngine.RuntimeInitializeOnLoadMethodAttribute;
@@ -29,3 +30,4 @@ namespace Popcron.SceneStaging
         }
     }
 }
+#endif

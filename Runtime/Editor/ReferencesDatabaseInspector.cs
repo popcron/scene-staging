@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿#if UNITY_EDITOR
+using UnityEngine;
 using UnityEditor;
 
 namespace Popcron.SceneStaging
@@ -48,3 +49,4 @@ namespace Popcron.SceneStaging
         }
     }
 }
+#endif

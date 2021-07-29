@@ -105,72 +105,75 @@ namespace Popcron.SceneStaging
                     for (int c = componentsCount - 1; c >= 0; c--)
                     {
                         Object component = components[c];
-                        Type componentType = component.GetType();
-                        bool notStageSerialized = componentType.GetCustomAttribute<NotStageSerializedAttribute>() != null;
-                        if (notStageSerialized)
+                        if (component)
                         {
-                            continue;
-                        }
-
-                        processor = ComponentProcessor.Get(componentType);
-                        if (processor != null)
-                        {
-                            Component comp = new Component(componentType.AssemblyQualifiedName);
-                            Object unityComponent = processor.GetOrAddComponent(comp, gameObject);
-                            if (unityComponent)
+                            Type componentType = component.GetType();
+                            bool notStageSerialized = componentType.GetCustomAttribute<NotStageSerializedAttribute>() != null;
+                            if (notStageSerialized)
                             {
-                                processor.Stage = stage;
-                                processor.SaveComponent(comp, unityComponent);
-                                prop.AddComponent(comp);
+                                continue;
+                            }
 
-                                //inject transform references
-                                MemberInfo[] members = StageUtils.GetMembers(unityComponent.GetType());
-                                int membersCount = members.Length;
-                                for (int f = membersCount - 1; f >= 0; f--)
+                            processor = ComponentProcessor.Get(componentType);
+                            if (processor != null)
+                            {
+                                Component comp = new Component(componentType.AssemblyQualifiedName);
+                                Object unityComponent = processor.GetOrAddComponent(comp, gameObject);
+                                if (unityComponent)
                                 {
-                                    MemberInfo member = members[f];
-                                    if (member.DeclaringType == typeof(Transform))
+                                    processor.Stage = stage;
+                                    processor.SaveComponent(comp, unityComponent);
+                                    prop.AddComponent(comp);
+
+                                    //inject transform references
+                                    MemberInfo[] members = StageUtils.GetMembers(unityComponent.GetType());
+                                    int membersCount = members.Length;
+                                    for (int f = membersCount - 1; f >= 0; f--)
                                     {
-                                        //attempt to set the transform value for this field
-                                        string name = member.Name;
-                                        if (comp.Contains(name))
+                                        MemberInfo member = members[f];
+                                        if (member.DeclaringType == typeof(Transform))
                                         {
-                                            Transform transformValue = null;
-                                            FieldInfo field = member as FieldInfo;
-                                            PropertyInfo property = member as PropertyInfo;
-                                            if (field != null)
+                                            //attempt to set the transform value for this field
+                                            string name = member.Name;
+                                            if (comp.Contains(name))
                                             {
-                                                transformValue = field.GetValue(unityComponent) as Transform;
-                                            }
-                                            else if (property != null)
-                                            {
-                                                if (property.GetMethod != null)
+                                                Transform transformValue = null;
+                                                FieldInfo field = member as FieldInfo;
+                                                PropertyInfo property = member as PropertyInfo;
+                                                if (field != null)
                                                 {
-                                                    transformValue = property.GetValue(unityComponent) as Transform;
+                                                    transformValue = field.GetValue(unityComponent) as Transform;
                                                 }
-                                            }
-
-                                            if (transformValue)
-                                            {
-                                                if (stageProps.TryGetValue(transformValue.gameObject, out Prop transformObject))
+                                                else if (property != null)
                                                 {
-                                                    bool set = false;
-                                                    int variablesCount = comp.Count;
-                                                    for (int v = variablesCount - 1; v >= 0; v--)
+                                                    if (property.GetMethod != null)
                                                     {
-                                                        Variable variable = comp[v];
-                                                        if (variable.Name == name)
-                                                        {
-                                                            set = true;
-                                                            comp[v] = new Variable(name, transformObject.ID.ToString());
-                                                            break;
-                                                        }
+                                                        transformValue = property.GetValue(unityComponent) as Transform;
                                                     }
+                                                }
 
-                                                    //wasnt set because it doesnt exist in the list
-                                                    if (!set)
+                                                if (transformValue)
+                                                {
+                                                    if (stageProps.TryGetValue(transformValue.gameObject, out Prop transformObject))
                                                     {
-                                                        comp.Set(name, transformObject.ID);
+                                                        bool set = false;
+                                                        int variablesCount = comp.Count;
+                                                        for (int v = variablesCount - 1; v >= 0; v--)
+                                                        {
+                                                            Variable variable = comp[v];
+                                                            if (variable.Name == name)
+                                                            {
+                                                                set = true;
+                                                                comp[v] = new Variable(name, transformObject.ID.ToString());
+                                                                break;
+                                                            }
+                                                        }
+
+                                                        //wasnt set because it doesnt exist in the list
+                                                        if (!set)
+                                                        {
+                                                            comp.Set(name, transformObject.ID);
+                                                        }
                                                     }
                                                 }
                                             }

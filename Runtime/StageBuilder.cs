@@ -6,9 +6,15 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
+using System.Collections;
+
+#if UNITY_2019_3_OR_NEWER
 using UnityEngine.LowLevel;
 using UnityEngine.PlayerLoop;
-using System.Collections;
+#else
+using UnityEngine.Experimental.LowLevel;
+using UnityEngine.Experimental.PlayerLoop;
+#endif
 
 #if UNITY_EDITOR
 using UnityEditor.Callbacks;
@@ -138,7 +144,11 @@ namespace Popcron.SceneStaging
         {
             if (Application.isPlaying)
             {
+#if UNITY_2019_3_OR_NEWER
                 PlayerLoopSystem playerLoop = PlayerLoop.GetCurrentPlayerLoop();
+#else
+                PlayerLoopSystem playerLoop = PlayerLoop.GetDefaultPlayerLoop();
+#endif
                 for (int i = 0; i < playerLoop.subSystemList.Length; i++)
                 {
                     ref PlayerLoopSystem system = ref playerLoop.subSystemList[i];
